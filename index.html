@@ -103,7 +103,7 @@ main.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22
   position:relative;margin:11px;border-radius:26px;padding:18px 20px 16px;
   background:radial-gradient(120% 90% at 50% 45%, #2b664b 0%, #1f4f3a 50%, #153a2a 100%);
   box-shadow:0 0 0 10px #5b3a22,0 0 0 12px #3a2314,0 22px 44px rgba(50,30,10,.35),inset 0 0 70px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.06);
-  display:grid;grid-template-rows:auto 1fr auto auto;gap:10px;color:var(--cream);
+  display:grid;grid-template-rows:auto 1fr auto;gap:10px;color:var(--cream);
 }
 .table::before{
   content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.22;mix-blend-mode:overlay;z-index:0;
@@ -117,6 +117,23 @@ main.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22
 .who .dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18);flex:0 0 auto}
 .seat.active .dot{background:var(--brass-hi);animation:pulse 1.6s infinite}
 .who .tag{display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-height:20px}
+.tipbtn{width:30px;height:30px;padding:0;margin-left:2px;border-radius:50%;border:1px solid rgba(244,236,218,.35);background:rgba(255,255,255,.08);color:var(--brass-hi);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
+.tipbtn svg{width:17px;height:17px;display:block}
+.tipbtn:disabled{opacity:.3;cursor:default}
+@media (hover:hover){ .tipbtn:not(:disabled):hover{border-color:var(--brass-hi);background:rgba(255,255,255,.16)} }
+.toast{position:absolute;left:50%;top:0;z-index:6;max-width:min(92%,440px);transform:translate(-50%,-40%);opacity:0;pointer-events:none;
+  background:var(--paper);color:var(--ink);border:1.5px solid var(--brass);border-radius:14px;padding:6px 12px;
+  font-family:var(--sans);font-size:13.5px;line-height:1.45;text-align:center;box-shadow:0 8px 22px rgba(0,0,0,.35);transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,-50%)}
+.toast b{color:#7a5512}
+.langgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.langopt{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:11px 14px;border-radius:12px;border:1px solid #cbbd9c;background:#fff;cursor:pointer;font-family:var(--sans);text-align:left}
+.langopt b{font-weight:600;font-size:14.5px}
+.langopt small{font-size:11px;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.langopt.on{background:var(--green);border-color:var(--green);color:#fbf5e6}
+.langopt.on small{color:rgba(251,245,230,.75)}
+@media (hover:hover){ .langopt:not(.on):hover{border-color:var(--brass)} }
+#setInstall .btn{margin-top:2px}
 .pts{display:none;font-family:var(--sans);font-style:normal;font-size:12px;font-weight:700;background:rgba(255,255,255,.13);color:var(--cream);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
 .badge{font-family:var(--sans);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid rgba(201,162,74,.6);color:var(--brass-hi);white-space:nowrap}
 .turn{font-family:var(--sans);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brass-hi);white-space:nowrap}
@@ -333,7 +350,7 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
 
 /* Portrait phones */
 @media (max-width:760px){
-  :root{ --cw: clamp(46px, min(21vw, calc((100 * var(--vh) - 285px) / 4.2)), 96px); }
+  :root{ --cw: clamp(46px, min(21vw, calc((100 * var(--vh) - 240px) / 4.2)), 96px); }
   .seat.opp{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px}
   .seat.opp .pile{justify-self:end}
   .opp .hand{min-height:calc(var(--ch)*.5)}
@@ -355,13 +372,15 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
   .count{font-size:11px}
   .tablecards{gap:7px;padding:8px;min-height:calc(var(--ch)*.8 + 18px)}
   .tablecards .card{width:calc(var(--cw)*.8);height:calc(var(--ch)*.8);border-radius:6px}
+  .tablecards.grow{min-height:calc(var(--ch)*1.6 + 23px)}
+  .langgrid{grid-template-columns:1fr}
   .hand{gap:9px;min-height:calc(var(--ch) + 14px);padding-top:14px}
   .me .hand .card.sel,.me .hand .card.sel:hover{transform:translateY(-12px)}
 }
 
 /* Landscape phones */
 @media (max-height:520px) and (orientation:landscape){
-  :root{ --cw: clamp(40px, min(9vw, calc((100 * var(--vh) - 165px) / 3.45)), 90px); }
+  :root{ --cw: clamp(40px, min(9vw, calc((100 * var(--vh) - 125px) / 3.45)), 90px); }
   header.top{padding:calc(3px + var(--sat)) 12px 2px}
   .brand h1{font-size:22px}
   .btn.icon-c{width:32px;height:32px}
@@ -434,15 +453,13 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
 <header class="top">
   <div class="brand"><h1>Scopa</h1><small data-i18n="tagline">Das italienische Kartenspiel</small></div>
   <div class="actions">
-    <select class="lang" id="langSel" data-i18n-aria="langAria">
-      <option value="de">DE</option>
-      <option value="it">IT</option>
-      <option value="en">EN</option>
-      <option value="sh">SH</option>
-    </select>
     <button class="btn icon-c" data-act="rules" data-i18n-aria="rules">
       <span class="txt" data-i18n="rules">Regeln</span>
       <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.4-2.7 4"/><circle cx="12" cy="17.3" r=".6" fill="currentColor"/></svg></span>
+    </button>
+    <button class="btn icon-c" data-act="settings" data-i18n-aria="settings">
+      <span class="txt" data-i18n="settings">Einstellungen</span>
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
     </button>
     <button class="btn primary icon-c" data-act="new" data-i18n-aria="newGame">
       <span class="txt" data-i18n="newGame">Neues Spiel</span>
@@ -472,16 +489,12 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
       <div class="deck" id="deck"></div>
       <div class="tablecards" id="tableCards"></div>
       <div class="roundinfo" id="roundInfo"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </div>
     <div class="seat me" id="seatMe">
-      <div class="who"><div class="name"><span class="dot"></span><span data-i18n="you">Du</span><span class="pts" id="pts0">0</span></div><div class="tag" id="tag0"></div></div>
+      <div class="who"><div class="name"><span class="dot"></span><span data-i18n="you">Du</span><span class="pts" id="pts0">0</span><button class="tipbtn" id="tipBtn" data-act="tip" data-i18n-aria="tipTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.55 1.1 1.3 1.1 2.2h5c0-.9.4-1.65 1.1-2.2A6 6 0 0 0 12 3z"/></svg></button></div><div class="tag" id="tag0"></div></div>
       <div class="hand" id="myHand"></div>
       <div class="pile" id="pile0"></div>
-    </div>
-    <div class="bar">
-      <div class="status" id="status" aria-live="polite"></div>
-      <div class="opts" id="opts"></div>
-      <button class="btn dark" id="tipBtn" data-act="tip" data-i18n="tip">Tipp</button>
     </div>
   </section>
 
@@ -497,7 +510,7 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
     </div>
     <div><h3 class="sec" data-i18n="thisRound">Diese Runde</h3><table class="tally" id="tally"></table></div>
     <div class="logwrap"><h3 class="sec" data-i18n="history">Verlauf</h3><div class="log" id="log"></div></div>
-    <div class="foot"><span id="statsLine"></span><span class="links"><button class="linkbtn" id="installLink" data-act="installShow" data-i18n="installLink" hidden>Als App installieren</button><button class="linkbtn" data-act="new" data-i18n="settings">Einstellungen</button></span></div>
+    <div class="foot"><span id="statsLine"></span><span class="links"><button class="linkbtn" id="installLink" data-act="installShow" data-i18n="installLink" hidden>Als App installieren</button><button class="linkbtn" data-act="settings" data-i18n="settings">Einstellungen</button></span></div>
   </aside>
 </main>
 <div class="sheet-backdrop" data-act="sheetClose"></div>
@@ -511,6 +524,24 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
     <p class="sub" id="sumSub"></p>
     <div id="sumBody"></div>
     <div class="row-btns" id="sumBtns"></div>
+  </div>
+</div>
+
+<div class="overlay" id="ovSettings" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <h2 id="setTitle" data-i18n="settings">Einstellungen</h2>
+    <div class="field"><span data-i18n="language">Sprache</span>
+      <div class="langgrid">
+        <button class="langopt" data-lang="de"><b>Deutsch</b><small>DE</small></button>
+        <button class="langopt" data-lang="it"><b>Italiano</b><small>IT</small></button>
+        <button class="langopt" data-lang="en"><b>English</b><small>EN</small></button>
+        <button class="langopt" data-lang="sh"><b>Srpskohrvatski</b><small>SH</small></button>
+      </div>
+    </div>
+    <div class="field" id="setInstall" hidden><span data-i18n="installTitle">Scopa als App</span>
+      <button class="btn" data-act="installShow" data-i18n="installLink">Als App installieren</button>
+    </div>
+    <div class="row-btns"><button class="btn primary" data-act="close" data-i18n="done">Fertig</button></div>
   </div>
 </div>
 
@@ -596,7 +627,7 @@ const I18N = {
     stCompPlays:'Der Computer spielt …', stCompThinks:'Der Computer überlegt …',
     stYourTurn:'<b>Du bist am Zug.</b> Wähle eine Karte aus deiner Hand.',
     tipPrefix:'<b>Tipp:</b> ',
-    stCant:c => `${c} kann nichts stechen – aufs Spielfeld tippen oder ziehen:`, putDown:'Auf den Tisch legen',
+    stCant:c => `${c} kann nichts stechen – aufs Spielfeld tippen oder ziehen.`, putDown:'Auf den Tisch legen',
     mustCapture:c => `<b>${c} muss stechen</b> – sie kann nicht abgelegt werden.`,
     stOne:c => `${c} sticht – Tischkarte antippen, hinziehen oder:`,
     stMany:c => `${c} sticht – wähle, was du nimmst:`,
@@ -605,7 +636,8 @@ const I18N = {
     lvl_easy:'Leicht', lvl_normal:'Normal', lvl_hard:'Schwer',
     rowCards:'Karten', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Siebener', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Bilanz: ${w} ${w === 1 ? 'Sieg' : 'Siege'} · ${l} ${l === 1 ? 'Niederlage' : 'Niederlagen'}`,
-    settings:'Einstellungen',
+    settings:'Einstellungen', language:'Sprache', done:'Fertig', tipTitle:'Tipp: bester Zug laut Computer (T)',
+    toastMany:c => `${c} sticht – tippe die Karten an, die du nehmen willst.`,
     ace:'Ass', cardName:(r, s) => `${r} ${s}`, settebelloName:'Settebello (7 Denari)', key:n => `Taste ${n}`,
     logStart:(r, compDeals) => `Runde ${r}: ${compDeals ? 'Der Computer gibt – du beginnst.' : 'Du gibst – der Computer beginnt.'}`,
     logCapture:(p, c, cs) => p === 0 ? `<b>Du</b> spielst ${c} und nimmst ${cs}` : `<b>Computer</b> spielt ${c} und nimmt ${cs}`,
@@ -629,7 +661,7 @@ const I18N = {
       + sec('Primiera', 'Pro Farbe zählt deine beste Karte, die vier Werte werden addiert. Wer nicht alle vier Farben hat, kann die Primiera nicht gewinnen.')
       + primTab('Ass', 'Bildkarten')
       + sec('Spielende', 'Wer zuerst die Zielpunktzahl erreicht, gewinnt. Erreichen beide sie in derselben Runde, gewinnt die höhere Zahl; bei Gleichstand wird weitergespielt.')
-      + sec('Bedienung', 'Wähle eine Handkarte und dann die Tischkarten, die du nehmen willst – oder eine der Optionen unten. Du kannst die Karte auch aufs Spielfeld oder direkt auf eine Tischkarte ziehen. Kann sie nichts stechen, legst du sie ab, indem du nach der Auswahl aufs Spielfeld tippst. Nochmal antippen hebt die Auswahl auf; mit der Maus spielt ein Doppelklick die Karte direkt, wenn es nur eine Möglichkeit gibt. Tasten: <kbd>1</kbd>–<kbd>3</kbd> Karte wählen, <kbd>Enter</kbd> spielen, <kbd>Esc</kbd> abwählen, <kbd>T</kbd> Tipp.'),
+      + sec('Bedienung', 'Wähle eine Handkarte und dann die Tischkarten, die du nehmen willst. Du kannst die Karte auch aufs Spielfeld oder direkt auf eine Tischkarte ziehen. Kann sie nichts stechen, legst du sie ab, indem du nach der Auswahl aufs Spielfeld tippst. Nochmal antippen hebt die Auswahl auf; mit der Maus spielt ein Doppelklick die Karte direkt, wenn es nur eine Möglichkeit gibt. Tasten: <kbd>1</kbd>–<kbd>3</kbd> Karte wählen, <kbd>Enter</kbd> spielen, <kbd>Esc</kbd> abwählen, <kbd>T</kbd> Tipp.'),
     installTitle:'Scopa als App', installBtn:'Installieren',
     installText:'Startet wie eine App und läuft auch offline.',
     installIOS:`Tippe auf <b>Teilen</b> ${SHARE} → <b>„Zum Home-Bildschirm“</b>. Läuft dann auch offline.`,
@@ -648,7 +680,7 @@ const I18N = {
     stCompPlays:'Il computer gioca …', stCompThinks:'Il computer ci pensa …',
     stYourTurn:'<b>Tocca a te.</b> Scegli una carta dalla tua mano.',
     tipPrefix:'<b>Consiglio:</b> ',
-    stCant:c => `${c} non può prendere – tocca il tavolo o trascinala lì:`, putDown:'Metti sul tavolo',
+    stCant:c => `${c} non può prendere – tocca il tavolo o trascinala lì.`, putDown:'Metti sul tavolo',
     mustCapture:c => `<b>${c} deve prendere</b> – non si può scartare.`,
     stOne:c => `${c} prende – tocca la carta sul tavolo, trascinala o:`,
     stMany:c => `${c} prende – scegli cosa prendere:`,
@@ -657,7 +689,8 @@ const I18N = {
     lvl_easy:'Facile', lvl_normal:'Normale', lvl_hard:'Difficile',
     rowCards:'Carte', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Sette', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Bilancio: ${w} ${w === 1 ? 'vittoria' : 'vittorie'} · ${l} ${l === 1 ? 'sconfitta' : 'sconfitte'}`,
-    settings:'Impostazioni',
+    settings:'Impostazioni', language:'Lingua', done:'Fatto', tipTitle:'Consiglio: mossa migliore secondo il computer (T)',
+    toastMany:c => `${c} prende – tocca le carte che vuoi prendere.`,
     ace:'Asso', cardName:(r, s) => `${r} di ${s}`, settebelloName:'Settebello (7 di Denari)', key:n => `tasto ${n}`,
     logStart:(r, compDeals) => `Mano ${r}: ${compDeals ? 'Il computer fa le carte – inizi tu.' : 'Fai tu le carte – inizia il computer.'}`,
     logCapture:(p, c, cs) => p === 0 ? `<b>Tu</b> giochi ${c} e prendi ${cs}` : `<b>Computer</b> gioca ${c} e prende ${cs}`,
@@ -681,7 +714,7 @@ const I18N = {
       + sec('Primiera', 'Per ogni seme conta la tua carta migliore; si sommano i quattro valori. Chi non ha tutti e quattro i semi non può vincere la primiera.')
       + primTab('Asso', 'Figure')
       + sec('Fine della partita', 'Vince chi raggiunge per primo il punteggio stabilito. Se lo raggiungono entrambi nella stessa mano vince chi ha di più; in caso di parità si continua.')
-      + sec('Comandi', 'Scegli una carta dalla mano e poi le carte del tavolo che vuoi prendere – oppure una delle opzioni in basso. Puoi anche trascinare la carta sul tavolo o direttamente sulla carta da prendere. Se non può prendere nulla, scartala toccando il tavolo dopo averla scelta. Toccarla di nuovo annulla la selezione; con il mouse un doppio clic la gioca subito se c’è una sola possibilità. Tasti: <kbd>1</kbd>–<kbd>3</kbd> scegli la carta, <kbd>Invio</kbd> gioca, <kbd>Esc</kbd> annulla, <kbd>T</kbd> consiglio.'),
+      + sec('Comandi', 'Scegli una carta dalla mano e poi le carte del tavolo che vuoi prendere. Puoi anche trascinare la carta sul tavolo o direttamente sulla carta da prendere. Se non può prendere nulla, scartala toccando il tavolo dopo averla scelta. Toccarla di nuovo annulla la selezione; con il mouse un doppio clic la gioca subito se c’è una sola possibilità. Tasti: <kbd>1</kbd>–<kbd>3</kbd> scegli la carta, <kbd>Invio</kbd> gioca, <kbd>Esc</kbd> annulla, <kbd>T</kbd> consiglio.'),
     installTitle:'Scopa come app', installBtn:'Installa',
     installText:"Si apre come un'app e funziona anche offline.",
     installIOS:`Tocca <b>Condividi</b> ${SHARE} → <b>«Aggiungi alla schermata Home»</b>. Funziona anche offline.`,
@@ -700,7 +733,7 @@ const I18N = {
     stCompPlays:'The computer is playing …', stCompThinks:'The computer is thinking …',
     stYourTurn:'<b>Your turn.</b> Pick a card from your hand.',
     tipPrefix:'<b>Hint:</b> ',
-    stCant:c => `${c} can’t capture – tap the table or drag it there:`, putDown:'Put it on the table',
+    stCant:c => `${c} can’t capture – tap the table or drag it there.`, putDown:'Put it on the table',
     mustCapture:c => `<b>${c} must capture</b> – it can’t be put down.`,
     stOne:c => `${c} captures – tap the table card, drag it there, or:`,
     stMany:c => `${c} captures – choose what to take:`,
@@ -709,7 +742,8 @@ const I18N = {
     lvl_easy:'Easy', lvl_normal:'Normal', lvl_hard:'Hard',
     rowCards:'Cards', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Sevens', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Record: ${w} ${w === 1 ? 'win' : 'wins'} · ${l} ${l === 1 ? 'loss' : 'losses'}`,
-    settings:'Settings',
+    settings:'Settings', language:'Language', done:'Done', tipTitle:'Hint: best move according to the computer (T)',
+    toastMany:c => `${c} captures – tap the cards you want to take.`,
     ace:'Ace', cardName:(r, s) => `${r} of ${s}`, settebelloName:'Settebello (7 of Denari)', key:n => `key ${n}`,
     logStart:(r, compDeals) => `Round ${r}: ${compDeals ? 'The computer deals – you start.' : 'You deal – the computer starts.'}`,
     logCapture:(p, c, cs) => p === 0 ? `<b>You</b> play ${c} and take ${cs}` : `<b>Computer</b> plays ${c} and takes ${cs}`,
@@ -733,7 +767,7 @@ const I18N = {
       + sec('Primiera', 'For each suit your best card counts; the four values are added up. A player missing a suit can’t win the Primiera.')
       + primTab('Ace', 'Face cards')
       + sec('End of the game', 'The first to reach the target score wins. If both reach it in the same round, the higher score wins; on a tie, play continues.')
-      + sec('Controls', 'Select a hand card, then the table cards you want to take – or one of the options below. You can also drag the card onto the table or straight onto a card to capture. If it can’t capture, put it down by tapping the table after selecting it. Tapping it again deselects it; with a mouse, a double-click plays it straight away if there’s only one possibility. Keys: <kbd>1</kbd>–<kbd>3</kbd> select a card, <kbd>Enter</kbd> play, <kbd>Esc</kbd> deselect, <kbd>T</kbd> hint.'),
+      + sec('Controls', 'Select a hand card, then the table cards you want to take. You can also drag the card onto the table or straight onto a card to capture. If it can’t capture, put it down by tapping the table after selecting it. Tapping it again deselects it; with a mouse, a double-click plays it straight away if there’s only one possibility. Keys: <kbd>1</kbd>–<kbd>3</kbd> select a card, <kbd>Enter</kbd> play, <kbd>Esc</kbd> deselect, <kbd>T</kbd> hint.'),
     installTitle:'Scopa as an app', installBtn:'Install',
     installText:'Opens like an app and works offline.',
     installIOS:`Tap <b>Share</b> ${SHARE} → <b>“Add to Home Screen”</b>. Works offline too.`,
@@ -753,7 +787,7 @@ const I18N = {
     stCompPlays:'Kompjuter igra …', stCompThinks:'Kompjuter razmišlja …',
     stYourTurn:'<b>Ti si na potezu.</b> Izaberi kartu iz ruke.',
     tipPrefix:'<b>Savjet:</b> ',
-    stCant:c => `${c} ne može ništa uzeti – dodirni polje ili je povuci na njega:`, putDown:'Odloži na polje',
+    stCant:c => `${c} ne može ništa uzeti – dodirni polje ili je povuci na njega.`, putDown:'Odloži na polje',
     mustCapture:c => `<b>${c} mora uzeti</b> – ne može se odložiti.`,
     stOne:c => `${c} uzima – dodirni kartu na polju, povuci je ili:`,
     stMany:c => `${c} uzima – izaberi karte koje uzimaš:`,
@@ -762,7 +796,8 @@ const I18N = {
     lvl_easy:'Lako', lvl_normal:'Normalno', lvl_hard:'Teško',
     rowCards:'Karte', rowDenari:'Dinari', rowSettebello:'Settebello', rowSevens:'Sedmice', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Pobjede: ${w} · Porazi: ${l}`,
-    settings:'Postavke',
+    settings:'Postavke', language:'Jezik', done:'Gotovo', tipTitle:'Savjet: najbolji potez po kompjuteru (T)',
+    toastMany:c => `${c} uzima – dodirni karte koje želiš uzeti.`,
     ace:'As', cardName:(r, s) => `${r} ${s}`, settebelloName:'Settebello (sedmica dinara)', key:n => `[${n}]`,
     logStart:(r, compDeals) => `Runda ${r}: ${compDeals ? 'Kompjuter dijeli – ti počinješ.' : 'Ti dijeliš – kompjuter počinje.'}`,
     logCapture:(p, c, cs) => p === 0 ? `<b>Ti</b> igraš ${c} i uzimaš ${cs}` : `<b>Kompjuter</b> igra ${c} i uzima ${cs}`,
@@ -786,7 +821,7 @@ const I18N = {
       + sec('Primiera', 'Za svaku boju broji se tvoja najjača karta, a računa se ukupna vrijednost te četiri karte. Igrač kojem nedostaje neka boja ne može dobiti primieru.')
       + primTab('As', 'Slike')
       + sec('Kraj partije', 'Pobjeđuje igrač koji prvi stigne do zadanog broja bodova. Ako oba stignu do njega u istoj rundi, pobjeđuje onaj s više bodova; kod neriješenog igra se dalje.')
-      + sec('Upravljanje', 'Izaberi kartu iz ruke, zatim karte na polju koje želiš uzeti – ili jednu od opcija ispod. Kartu možeš i povući na polje ili direktno na kartu koju uzimaš. Ako ne može ništa uzeti, odloži je tako da nakon izbora dodirneš polje. Ponovni dodir poništava izbor; mišem dvostruki klik odmah igra kartu ako postoji samo jedna mogućnost. <kbd>1</kbd>–<kbd>3</kbd> izbor karte, <kbd>Enter</kbd> igraj, <kbd>Esc</kbd> poništi, <kbd>T</kbd> savjet.'),
+      + sec('Upravljanje', 'Izaberi kartu iz ruke, zatim karte na polju koje želiš uzeti. Kartu možeš i povući na polje ili direktno na kartu koju uzimaš. Ako ne može ništa uzeti, odloži je tako da nakon izbora dodirneš polje. Ponovni dodir poništava izbor; mišem dvostruki klik odmah igra kartu ako postoji samo jedna mogućnost. <kbd>1</kbd>–<kbd>3</kbd> izbor karte, <kbd>Enter</kbd> igraj, <kbd>Esc</kbd> poništi, <kbd>T</kbd> savjet.'),
     installTitle:'Scopa kao aplikacija', installBtn:'Instaliraj',
     installText:'Otvara se kao aplikacija i radi i bez interneta.',
     installIOS:`Dodirni <b>Dijeli</b> ${SHARE} → <b>„Dodaj na početni zaslon“</b>. Radi i bez interneta.`,
@@ -1429,38 +1464,22 @@ function render(){
     : `<div class="stack"><div class="slot"></div></div><div class="count">${t('deckEmpty')}</div>`;
   $('#roundInfo').innerHTML = `${t('lastTaker')}<br><b>${S.lastTaker === null ? '–' : (S.lastTaker === 0 ? t('you') : t('computer'))}</b>`;
 
-  renderBar(sel, opts);
+  $('#tableCards').classList.toggle('grow', S.table.length + (P && !P.capture.length ? 1 : 0) >= 4);
+  $('#tipBtn').disabled = !canAct();
   renderPanel();
   dealAnim();
 }
 
-function renderBar(sel, opts){
-  let s = '', o = '';
-  if (S.phase === 'roundEnd' || S.phase === 'over'){
-    s = S.phase === 'over' ? t('stGameOver') : t('stRoundOver');
-    o = `<button class="chip plain" data-act="summary">${t('showSummary')}</button>`;
-  } else if (S.phase === 'anim'){
-    s = S.pending && S.pending.p === 1 ? t('stCompPlays') : '&nbsp;';
-  } else if (S.turn === 1){
-    s = t('stCompThinks');
-  } else if (!sel){
-    s = t('stYourTurn');
-  } else if (!opts.length){
-    s = (S.tip ? t('tipPrefix') : '') + t('stCant', mini(sel));
-    o = `<button class="chip plain${S.tip ? ' rec' : ''}" data-discard="1">${t('putDown')}</button>`;
-  } else {
-    const last = !S.deck.length && S.hands[0].length === 1 && !S.hands[1].length;
-    s = (S.tip ? t('tipPrefix') : '') + (opts.length > 1 ? t('stMany', mini(sel)) : t('stOne', mini(sel)));
-    o = opts.map((op, i) => {
-      const rec = S.tip && S.tip.card === sel.id && S.tip.cap.length === op.length && op.every(c => S.tip.cap.includes(c.id));
-      const sweep = op.length === S.table.length && !last;
-      return `<button class="chip${rec ? ' rec' : ''}" data-opt="${i}">${op.map(mini).join('<span class="plus">+</span>')}${sweep ? '<span class="sc">Scopa</span>' : ''}</button>`;
-    }).join('');
-  }
-  $('#status').innerHTML = s;
-  $('#opts').innerHTML = o;
-  $('#tipBtn').disabled = !canAct();
+let toastTimer = null;
+function toast(html, ms = 2600){
+  const el = $('#toast');
+  if (!el) return;
+  el.innerHTML = html;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), ms);
 }
+function hideToast(){ clearTimeout(toastTimer); const el = $('#toast'); if (el) el.classList.remove('show'); }
 
 function renderPanel(){
   for (const p of [0, 1]){
@@ -1505,7 +1524,7 @@ function openSummary(){
         + `<tr class="total grand"><td>${t('sumTotal')}</td><td>${s0}</td><td>${s1}</td></tr></tbody></table>`;
   $('#sumBody').innerHTML = body;
   $('#sumBtns').innerHTML = S.phase === 'over'
-    ? `<button class="btn" data-act="new">${t('settings')}</button><button class="btn primary" data-act="again">${t('again')}</button>`
+    ? `<button class="btn" data-act="new">${t('newGame')}</button><button class="btn primary" data-act="again">${t('again')}</button>`
     : `<button class="btn primary" data-act="next">${t('nextRound')}</button>`;
   $('#ovSummary').hidden = false;
 }
@@ -1515,8 +1534,8 @@ function applyStatic(){
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { const v = t(el.dataset.i18nAria); el.setAttribute('aria-label', v); el.title = v; });
-  $('#tipBtn').title = ({de:'Bester Zug laut Computer (Taste T)', it:'Mossa migliore secondo il computer (tasto T)', en:'Best move according to the computer (key T)', sh:'Najbolji potez po kompjuteru (T)'})[lang];
-  $('#langSel').value = lang;
+  document.querySelectorAll('.langopt').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  $('#setInstall').hidden = !installMode();
   updateInstall();
 }
 
@@ -1541,9 +1560,12 @@ function onHandClick(id, detail){
   if (!canAct()) return;
   if (detail >= 2 && lastPointer === 'mouse' && lastHandClick === id){ lastHandClick = null; quickPlay(id); return; }
   lastHandClick = id;
-  if (S.sel === id){ S.sel = null; S.tsel = []; S.tip = null; render(); return; }
+  if (S.sel === id){ S.sel = null; S.tsel = []; S.tip = null; hideToast(); render(); return; }
   S.sel = id; S.tsel = []; S.tip = null;
   render();
+  const info = selectedInfo();
+  if (info && info.opts.length > 1) toast(t('toastMany', mini(info.card)));
+  else hideToast();
 }
 
 function quickPlay(id){
@@ -1565,8 +1587,8 @@ function shake(sel){
 function onTableClick(id){
   if (!canAct()) return;
   const info = selectedInfo();
-  if (!info){ $('#status').innerHTML = t('stSelectFirst'); return; }
-  if (!info.opts.length){ shake(`[data-table="${id}"]`); return; }
+  if (!info){ toast(t('stSelectFirst')); return; }
+  if (!info.opts.length){ shake(`[data-table="${id}"]`); toast(t('stCant', mini(info.card))); return; }
   const next = S.tsel.includes(id) ? S.tsel.filter(x => x !== id) : S.tsel.concat(id);
   const compatible = info.opts.filter(o => next.every(x => o.some(c => c.id === x)));
   if (!compatible.length){ shake(`[data-table="${id}"]`); return; }
@@ -1596,15 +1618,16 @@ function giveTip(){
   S.sel = m.card.id;
   S.tsel = [];
   render();
+  toast(t('tipPrefix') + mini(m.card) + ' → ' + (m.capture.length ? m.capture.map(mini).join(' + ') : t('putDown')), 3600);
 }
 
 // Ausgewählte Karte aufs Spielfeld tippen: ablegen (nur wenn sie nichts stechen kann)
 function onFieldTap(){
   if (!canAct()) return;
   const info = selectedInfo();
-  if (!info){ if (S.table.length) $('#status').innerHTML = t('stSelectFirst'); return; }
+  if (!info){ if (S.table.length) toast(t('stSelectFirst')); return; }
   if (!info.opts.length){ playMove(0, info.card, []); return; }
-  $('#status').innerHTML = t('mustCapture', mini(info.card));
+  toast(t('mustCapture', mini(info.card)));
   shake(`[data-hand="${info.card.id}"]`);
 }
 
@@ -1705,13 +1728,6 @@ document.addEventListener('pointercancel', e => {
   if (drag.active){ const d = drag; drag = null; d.fly.remove(); clearDropMarks(); render(); } else drag = null;
 });
 
-function highlightOpt(i){
-  document.querySelectorAll('.tablecards .hov').forEach(el => el.classList.remove('hov'));
-  if (i == null || !canAct()) return;
-  const info = selectedInfo();
-  const op = info && info.opts[i];
-  if (op) op.forEach(c => { const el = document.querySelector(`[data-table="${c.id}"]`); if (el) el.classList.add('hov'); });
-}
 
 function openNew(){
   const tr = document.querySelector(`input[name=target][value="${settings.target}"]`);
@@ -1736,6 +1752,7 @@ function onAct(a, el){
   switch (a){
     case 'rules': document.body.classList.remove('sheet-open'); $('#ovRules').hidden = false; break;
     case 'new': openNew(); break;
+    case 'settings': document.body.classList.remove('sheet-open'); applyStatic(); $('#ovSettings').hidden = false; break;
     case 'close': { const ov = el && el.closest('.overlay'); if (ov) ov.hidden = true; break; }
     case 'start': startFromDialog(); break;
     case 'tip': giveTip(); break;
@@ -1746,11 +1763,11 @@ function onAct(a, el){
     case 'sheetClose': document.body.classList.remove('sheet-open'); break;
     case 'install': doInstall(); break;
     case 'installClose': ui.installDismissed = true; save(); updateInstall(); break;
-    case 'installShow': document.body.classList.remove('sheet-open'); updateInstall(true); window.scrollTo({top:0, behavior:'smooth'}); break;
+    case 'installShow': document.body.classList.remove('sheet-open'); $('#ovSettings').hidden = true; updateInstall(true); window.scrollTo({top:0, behavior:'smooth'}); break;
   }
 }
 
-const CLICKABLE = '[data-hand],[data-table],[data-opt],[data-discard],[data-act]';
+const CLICKABLE = '[data-hand],[data-table],[data-opt],[data-discard],[data-act],[data-lang]';
 document.addEventListener('click', e => {
   let tEl = e.target.closest(CLICKABLE);
   // Nach einem Neuzeichnen kann der Browser den Klick dem Container zuordnen – dann frisch nachsehen, was unter dem Zeiger liegt
@@ -1760,7 +1777,7 @@ document.addEventListener('click', e => {
   }
   if (suppressClick){ suppressClick = false; return; }
   if (!tEl){
-    if (e.target.closest('#tableCards')){ onFieldTap(); return; }
+    if (e.target.closest('.center')){ onFieldTap(); return; }
     // Tippen auf freien Filz hebt die Auswahl auf
     if (S && S.sel != null && canAct() && e.target.closest('.table') && !e.target.closest('.bar')){
       S.sel = null; S.tsel = []; S.tip = null; render();
@@ -1768,28 +1785,23 @@ document.addEventListener('click', e => {
     return;
   }
   if (tEl.tagName === 'BUTTON') tEl.blur();
-  if (tEl.dataset.hand != null) onHandClick(+tEl.dataset.hand, e.detail);
+  if (tEl.dataset.lang) setLang(tEl.dataset.lang);
+  else if (tEl.dataset.hand != null) onHandClick(+tEl.dataset.hand, e.detail);
   else if (tEl.dataset.table != null) onTableClick(+tEl.dataset.table);
   else if (tEl.dataset.opt != null) onOpt(+tEl.dataset.opt);
   else if (tEl.dataset.discard != null) onDiscard();
   else onAct(tEl.dataset.act, tEl);
 });
-$('#opts').addEventListener('mouseover', e => {
-  const c = e.target.closest('[data-opt]');
-  highlightOpt(c ? +c.dataset.opt : null);
-});
-$('#opts').addEventListener('mouseleave', () => highlightOpt(null));
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => {
   if (e.target === o && o.id !== 'ovSummary') o.hidden = true;
 }));
-$('#langSel').addEventListener('change', e => setLang(e.target.value));
 
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.target && e.target.tagName === 'SELECT') return;
-  const newOpen = !$('#ovNew').hidden, rulesOpen = !$('#ovRules').hidden, sumOpen = !$('#ovSummary').hidden;
-  if (newOpen || rulesOpen){
-    if (e.key === 'Escape') (newOpen ? $('#ovNew') : $('#ovRules')).hidden = true;
+  const newOpen = !$('#ovNew').hidden, rulesOpen = !$('#ovRules').hidden, sumOpen = !$('#ovSummary').hidden, setOpen = !$('#ovSettings').hidden;
+  if (newOpen || rulesOpen || setOpen){
+    if (e.key === 'Escape') (newOpen ? $('#ovNew') : rulesOpen ? $('#ovRules') : $('#ovSettings')).hidden = true;
     else if (e.key === 'Enter' && newOpen){ e.preventDefault(); startFromDialog(); }
     return;
   }
@@ -1833,6 +1845,7 @@ function updateInstall(force){
   const m = installMode();
   const box = $('#install');
   $('#installLink').hidden = !m;
+  $('#setInstall').hidden = !m;
   if (force && m){ ui.installDismissed = false; save(); }
   if (!m || ui.installDismissed){ box.hidden = true; return; }
   $('#installText').innerHTML = m === 'prompt' ? t('installText') : m === 'ios' ? t('installIOS') : t('installMac');
