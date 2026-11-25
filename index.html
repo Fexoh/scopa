@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scopa</title>
+<style>
+:root{
+  --linen:#ebe3d1;
+  --ink:#1f1b16;
+  --muted:#6f6656;
+  --paper:#fbf7ee;
+  --line:#e3d8c2;
+  --brass:#c9a24a;
+  --brass-hi:#ffd979;
+  --green:#2a5a43;
+  --cream:#f4ecda;
+  --cw: clamp(52px, min(6.6vw, 11.2vh), 96px);
+  --ch: calc(var(--cw) * 1.5);
+  --cr: calc(var(--cw) * .08);
+  --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:var(--serif);
+  color:var(--ink);
+  background:radial-gradient(1200px 600px at 15% -10%, #f6efe0 0%, transparent 60%), var(--linen);
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+button{font:inherit;color:inherit}
+
+/* ---------- Header ---------- */
+header.top{display:flex;align-items:center;gap:18px;padding:14px 26px 6px}
+.brand{display:flex;align-items:baseline;gap:14px}
+.brand h1{margin:0;font-size:36px;font-style:italic;font-weight:600;letter-spacing:.3px;line-height:1}
+.brand h1::after{content:"";display:inline-block;width:8px;height:8px;margin-left:6px;background:#9b2a2f;transform:rotate(45deg) translateY(-3px)}
+.brand small{font-family:var(--sans);font-size:12px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.top .actions{margin-left:auto;display:flex;gap:8px}
+
+.btn{
+  font-family:var(--sans);font-size:13.5px;font-weight:600;
+  border:1px solid #cbbd9c;background:var(--paper);padding:8px 15px;border-radius:999px;cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 1px 2px rgba(0,0,0,.08);
+  transition:background .15s,border-color .15s,transform .1s;
+}
+.btn:hover{border-color:var(--brass);background:#fff}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--green);color:#fbf5e6;border-color:#1d4532}
+.btn.primary:hover{background:#316a4f}
+.btn.dark{background:rgba(255,255,255,.08);color:var(--cream);border-color:rgba(244,236,218,.3);box-shadow:none}
+.btn.dark:hover{border-color:var(--brass-hi);background:rgba(255,255,255,.15)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:disabled:hover{border-color:rgba(244,236,218,.3);background:rgba(255,255,255,.08)}
+
+/* ---------- Layout ---------- */
+main.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22px;padding:4px 26px 26px;align-items:start}
+
+/* ---------- Table ---------- */
+.table{
+  position:relative;margin:11px;border-radius:26px;padding:18px 20px 16px;
+  background:radial-gradient(120% 90% at 50% 45%, #2b664b 0%, #1f4f3a 50%, #153a2a 100%);
+  box-shadow:0 0 0 10px #5b3a22,0 0 0 12px #3a2314,0 22px 44px rgba(50,30,10,.35),inset 0 0 70px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.06);
+  display:grid;grid-template-rows:auto 1fr auto auto;gap:10px;color:var(--cream);
+}
+.table::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.22;mix-blend-mode:overlay;z-index:0;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.table > *{position:relative;z-index:1}
+
+.seat,.center{display:grid;grid-template-columns:minmax(84px,150px) 1fr minmax(84px,150px);align-items:center;gap:12px}
+.who{display:flex;flex-direction:column;gap:6px}
+.who .name{font-size:20px;font-style:italic;display:flex;align-items:center;gap:9px}
+.who .dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18);flex:0 0 auto}
+.seat.active .dot{background:var(--brass-hi);animation:pulse 1.6s infinite}
+.who .tag{display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-height:20px}
+.badge{font-family:var(--sans);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid rgba(201,162,74,.6);color:var(--brass-hi)}
+.turn{font-family:var(--sans);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brass-hi)}
+
+.hand{display:flex;justify-content:center;align-items:flex-end;gap:12px;min-height:calc(var(--ch) + 24px);padding-top:22px}
+.opp .hand{min-height:calc(var(--ch)*.62 + 6px);padding-top:0;gap:0}
+.opp .hand .card{width:calc(var(--cw)*.62);height:calc(var(--ch)*.62);margin:0 -5px;border-radius:6px}
+
+/* ---------- Cards ---------- */
+.card{
+  width:var(--cw);height:var(--ch);border-radius:var(--cr);position:relative;flex:0 0 auto;
+  box-shadow:0 1px 2px rgba(0,0,0,.35),0 6px 14px rgba(0,0,0,.22);
+  transition:transform .18s ease,box-shadow .18s ease,filter .2s;
+  user-select:none;-webkit-user-select:none;
+}
+.card svg{display:block;width:100%;height:100%}
+.me .hand .card{cursor:pointer}
+.me .hand .card:hover{transform:translateY(-8px)}
+.me .hand .card.sel{transform:translateY(-20px);box-shadow:0 0 0 3px var(--brass-hi),0 14px 24px rgba(0,0,0,.38)}
+.me .hand.locked .card{cursor:default;filter:brightness(.9)}
+.me .hand.locked .card:hover{transform:none}
+.card.tip{animation:tipPulse 1.2s ease-in-out infinite}
+
+.tablecards{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:12px;padding:14px;min-height:calc(var(--ch) + 30px);border-radius:18px;border:1px dashed rgba(244,236,218,.14)}
+.tablecards .empty{font-style:italic;color:rgba(244,236,218,.4);font-size:17px}
+.tablecards .card.pickable{cursor:pointer;box-shadow:0 0 0 2px rgba(255,217,121,.6),0 6px 14px rgba(0,0,0,.22)}
+.tablecards .card.pickable:hover{transform:translateY(-4px)}
+.tablecards .card.picked,.tablecards .card.hov{transform:translateY(-8px);box-shadow:0 0 0 3px var(--brass-hi),0 12px 22px rgba(0,0,0,.35)}
+.tablecards .card.dim{filter:brightness(.6) saturate(.7)}
+.tablecards .card.tipcap{outline:2px dashed var(--brass-hi);outline-offset:4px}
+.card.taking{animation:taking .45s ease-in-out infinite alternate;box-shadow:0 0 0 3px var(--brass-hi),0 0 26px rgba(255,217,121,.7)}
+.card.incoming{box-shadow:0 0 0 3px #fff6d8,0 14px 28px rgba(0,0,0,.45)}
+.card.incoming.from-top{animation:fromTop .38s cubic-bezier(.2,.8,.2,1) both}
+.card.incoming.from-bottom{animation:fromBottom .3s cubic-bezier(.2,.8,.2,1) both}
+.card.fresh{animation:deal .42s cubic-bezier(.2,.8,.2,1) both}
+.card.shake{animation:shake .32s ease}
+
+/* ---------- Deck & piles ---------- */
+.deck,.pile{display:flex;flex-direction:column;align-items:center;gap:7px}
+.deck .stack{position:relative;width:calc(var(--cw)*.8);height:calc(var(--ch)*.8)}
+.deck .stack .card{position:absolute;inset:0;width:100%;height:100%;border-radius:6px}
+.deck .stack .card:nth-child(2){transform:translate(-3px,-3px)}
+.deck .stack .card:nth-child(3){transform:translate(-6px,-6px)}
+.pile .stack{position:relative;width:calc(var(--cw)*.62);height:calc(var(--ch)*.62)}
+.pile .stack .card{position:absolute;inset:0;width:100%;height:100%;border-radius:6px}
+.pile .stack .card + .card{transform:translate(4px,-3px) rotate(5deg)}
+.slot{width:100%;height:100%;border:1.5px dashed rgba(244,236,218,.22);border-radius:6px}
+.count{font-family:var(--sans);font-size:12px;color:rgba(244,236,218,.75);letter-spacing:.03em;text-align:center}
+.scopes{display:flex;align-items:center;gap:3px;font-family:var(--sans);font-size:11.5px;color:var(--brass-hi);font-weight:600}
+.scopes i{display:inline-block;width:7px;height:11px;border-radius:2px;background:var(--brass-hi);box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.scopes span{margin-left:4px}
+.roundinfo{font-family:var(--sans);font-size:12px;color:rgba(244,236,218,.65);text-align:center;line-height:1.55}
+.roundinfo b{color:var(--cream);font-weight:600}
+
+/* ---------- Action bar ---------- */
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:60px;padding:10px 12px 10px 16px;border-radius:14px;background:rgba(6,18,12,.38);border:1px solid rgba(255,255,255,.07);font-family:var(--sans);font-size:14px}
+.bar .status{flex:1 1 240px;color:var(--cream);line-height:1.5}
+.bar .status b{color:var(--brass-hi);font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--paper);color:var(--ink);border:none;border-radius:999px;padding:5px 12px 5px 8px;cursor:pointer;font-family:var(--sans);font-size:13.5px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.28);transition:transform .12s,box-shadow .12s}
+.chip:hover{transform:translateY(-1px);box-shadow:0 0 0 2px var(--brass-hi),0 4px 10px rgba(0,0,0,.3)}
+.chip.rec{background:var(--brass-hi)}
+.chip .plus{color:var(--muted);font-weight:400;margin:0 1px}
+.chip .sc{font-size:10.5px;color:#9b2a2f;text-transform:uppercase;letter-spacing:.07em;margin-left:3px}
+.chip.plain{padding:6px 14px}
+
+.mini{display:inline-flex;align-items:center;gap:1px;font-family:var(--sans);font-weight:700;font-variant-numeric:tabular-nums;padding:0 5px 0 6px;border-radius:6px;background:#fff;border:1px solid var(--line);line-height:1.45;font-size:.92em;vertical-align:middle;color:var(--ink)}
+.mini .ic{width:1.1em;height:1.1em}
+.mini.s0 b{color:#8a6214}.mini.s1 b{color:#a52c24}.mini.s2 b{color:#244c84}.mini.s3 b{color:#2f6b2c}
+.mini.sb{background:#fff3cf;border-color:#e2b13c}
+
+/* ---------- Side panel ---------- */
+.panel{background:var(--paper);border-radius:18px;padding:20px 18px 14px;box-shadow:0 1px 0 #fff inset,0 10px 30px rgba(60,40,10,.12);border:1px solid #e6dcc6;display:flex;flex-direction:column;gap:18px;position:sticky;top:12px;max-height:calc(100vh - 24px);margin-top:11px}
+.score{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;text-align:center}
+.score .num{font-size:54px;line-height:1;font-variant-numeric:tabular-nums;font-weight:600}
+.score .lbl{font-family:var(--sans);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.score .vs{font-size:34px;color:#b9ab8c;padding:6px 10px 0}
+.progress{height:4px;background:#ece2cc;border-radius:4px;overflow:hidden;margin:9px 10px 0}
+.progress i{display:block;height:100%;width:0;background:var(--brass);transition:width .5s ease}
+.meta{font-family:var(--sans);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:6px;border-top:1px solid var(--line);padding-top:11px;margin-top:14px}
+h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tally{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:13.5px}
+.tally th{font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right;padding:0 0 5px}
+.tally td{padding:5px 0;border-top:1px dotted #d9ccb1;text-align:right;font-variant-numeric:tabular-nums;width:22%}
+.tally td:first-child{text-align:left;color:#4a4337;width:auto}
+.tally td.lead{font-weight:700;color:var(--green)}
+.logwrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.log{flex:1;min-height:120px;overflow:auto;font-family:var(--sans);font-size:13px;line-height:1.5;padding-right:4px}
+.log div{padding:6px 0;border-top:1px dotted #e0d5bd}
+.log div:first-child{border-top:none}
+.log .sys{color:var(--muted);font-style:italic}
+.log em{font-style:normal;color:#9b2a2f;font-weight:700}
+.sbtag{font-size:10.5px;font-weight:700;color:#8a6214;background:#fff3cf;border:1px solid #e2b13c;border-radius:999px;padding:0 6px;margin-left:3px;text-transform:uppercase;letter-spacing:.05em}
+.foot{font-family:var(--sans);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.linkbtn{background:none;border:none;padding:0;color:var(--green);text-decoration:underline;cursor:pointer;font:inherit}
+
+/* ---------- Banner ---------- */
+#banner{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:50}
+#banner span{font-family:var(--serif);font-style:italic;font-weight:700;font-size:clamp(60px,10vw,132px);color:var(--brass-hi);text-shadow:0 3px 0 #7a5512,0 12px 44px rgba(0,0,0,.5);opacity:0}
+#banner.show span{animation:banner 1.5s cubic-bezier(.2,.9,.25,1) both}
+
+/* ---------- Dialogs ---------- */
+.overlay{position:fixed;inset:0;background:rgba(25,18,10,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:grid;place-items:center;z-index:40;padding:20px}
+.overlay[hidden]{display:none}
+.dialog{background:var(--paper);border-radius:18px;width:min(470px,100%);max-height:calc(100vh - 40px);overflow:auto;padding:24px 26px 20px;box-shadow:0 30px 80px rgba(0,0,0,.35);border:1px solid #e6dcc6;animation:pop .22s ease-out}
+.dialog.wide{width:min(640px,100%)}
+.dialog h2{margin:0 0 4px;font-style:italic;font-size:30px;font-weight:600}
+.dialog .sub{font-family:var(--sans);color:var(--muted);font-size:14px;margin:0 0 16px}
+.row-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.sum{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:14.5px}
+.sum th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 6px 6px;text-align:center}
+.sum td{padding:8px 6px;border-top:1px solid var(--line);text-align:center;font-variant-numeric:tabular-nums}
+.sum td:first-child{text-align:left;color:#4a4337}
+.sum td.win{font-weight:700;color:var(--green)}
+.sum td i{font-style:normal;font-size:11px;background:var(--green);color:#fff;border-radius:999px;padding:1px 7px;margin-left:7px;vertical-align:1px}
+.sum tr.total td{font-weight:700;border-top:2px solid #cdbf9f}
+.sum tr.grand td{font-size:17px;border-top:1px solid var(--line)}
+.field{margin:16px 0}
+.field > span{display:block;font-family:var(--sans);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.seg{position:relative;display:inline-flex;border:1px solid #cbbd9c;border-radius:999px;overflow:hidden;background:#fff}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:8px 18px;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;border-left:1px solid #e0d4ba}
+.seg label:first-of-type{border-left:none}
+.seg input:checked + label{background:var(--green);color:#fbf5e6}
+.seg input:focus-visible + label{outline:2px solid var(--brass);outline-offset:-3px}
+.hint{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-top:6px}
+.rules{font-family:var(--sans);font-size:14px;line-height:1.55;color:#2e2a24}
+.rules h4{margin:16px 0 3px;font-family:var(--serif);font-style:italic;font-size:18px;font-weight:600;color:var(--ink)}
+.rules p{margin:0}
+.rules kbd{font-family:var(--sans);font-size:12px;background:#fff;border:1px solid #d8cbb0;border-bottom-width:2px;border-radius:5px;padding:0 6px}
+.primtab{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.primtab span{background:#fff;border:1px solid var(--line);border-radius:8px;padding:2px 9px;font-variant-numeric:tabular-nums}
+.primtab b{color:#8a6214}
+
+/* ---------- Motion ---------- */
+@keyframes deal{from{opacity:0;transform:translateY(-18px) scale(.9) rotate(-3deg)}to{opacity:1;transform:none}}
+@keyframes fromTop{from{opacity:0;transform:translateY(-80px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes fromBottom{from{opacity:.2;transform:translateY(80px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes taking{from{transform:translateY(0)}to{transform:translateY(-6px) scale(1.03)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,217,121,.65)}70%{box-shadow:0 0 0 9px rgba(255,217,121,0)}100%{box-shadow:0 0 0 0 rgba(255,217,121,0)}}
+@keyframes tipPulse{0%,100%{box-shadow:0 0 0 3px var(--brass-hi),0 12px 22px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 7px rgba(255,217,121,.4),0 12px 22px rgba(0,0,0,.35)}}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes banner{0%{opacity:0;transform:scale(.6) rotate(-7deg)}18%{opacity:1;transform:scale(1.07) rotate(-3deg)}30%{transform:scale(1) rotate(-3deg)}80%{opacity:1}100%{opacity:0;transform:scale(1.04) rotate(-3deg)}}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition:none !important}}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1020px){
+  main.layout{grid-template-columns:1fr}
+  .panel{position:static;max-height:none}
+  .log{max-height:260px}
+}
+@media (max-width:640px){
+  :root{--cw:clamp(46px,15vw,78px)}
+  header.top{padding:10px 14px 4px}
+  .brand small{display:none}
+  main.layout{padding:4px 8px 16px;gap:14px}
+  .table{padding:12px 10px;margin:9px}
+  .seat{grid-template-columns:62px 1fr 62px;gap:6px}
+  .center{grid-template-columns:50px 1fr;gap:6px}
+  .roundinfo{display:none}
+  .who .name{font-size:16px}
+  .hand{gap:7px}
+  .tablecards{gap:7px;padding:8px;min-height:calc(var(--ch)*.8 + 18px)}
+  .tablecards .card{width:calc(var(--cw)*.8);height:calc(var(--ch)*.8);border-radius:6px}
+  .deck .stack{width:calc(var(--cw)*.6);height:calc(var(--ch)*.6)}
+  .count{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="pback" width="9" height="9" patternUnits="userSpaceOnUse">
+      <path d="M4.5 0 L9 4.5 L4.5 9 L0 4.5 Z" fill="none" stroke="#d9b765" stroke-opacity=".4" stroke-width=".7"/>
+      <circle cx="4.5" cy="4.5" r=".8" fill="#d9b765" fill-opacity=".38"/>
+    </pattern>
+    <radialGradient id="gcoin" cx="40%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#f7da80"/><stop offset="1" stop-color="#c8922a"/>
+    </radialGradient>
+  </defs>
+  <symbol id="s-denari" viewBox="0 0 40 40">
+    <circle cx="20" cy="20" r="17.5" fill="url(#gcoin)" stroke="#6f4e10" stroke-width="1.5"/>
+    <circle cx="20" cy="20" r="13.8" fill="none" stroke="#6f4e10" stroke-width="1.3" stroke-dasharray="1.6 2.2"/>
+    <circle cx="20" cy="20" r="10" fill="#d9a63a" stroke="#6f4e10" stroke-width="1"/>
+    <path d="M20 12.5 L22.2 17.8 L27.5 20 L22.2 22.2 L20 27.5 L17.8 22.2 L12.5 20 L17.8 17.8 Z" fill="#b3352b" stroke="#6f4e10" stroke-width=".7" stroke-linejoin="round"/>
+    <circle cx="20" cy="20" r="2" fill="#f7da80"/>
+  </symbol>
+  <symbol id="s-coppe" viewBox="0 0 40 40">
+    <path d="M8.5 7 H31.5 Q32.5 20 22.6 24.2 V29 Q27.5 30 29.5 34.3 H10.5 Q12.5 30 17.4 29 V24.2 Q7.5 20 8.5 7 Z" fill="#c63f35" stroke="#6e1c16" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M10.2 13.5 H29.8" stroke="#e8bb4a" stroke-width="2.2"/>
+    <path d="M12.5 18.5 Q20 21.5 27.5 18.5" fill="none" stroke="#e8bb4a" stroke-width="1.2"/>
+    <ellipse cx="20" cy="7" rx="11.6" ry="2.7" fill="#e8bb4a" stroke="#6e1c16" stroke-width="1.2"/>
+    <rect x="16.6" y="25.4" width="6.8" height="2.4" rx="1" fill="#e8bb4a" stroke="#6e1c16" stroke-width=".8"/>
+    <ellipse cx="20" cy="34.4" rx="10" ry="2.6" fill="#e8bb4a" stroke="#6e1c16" stroke-width="1.1"/>
+  </symbol>
+  <symbol id="s-spade" viewBox="0 0 40 40">
+    <path d="M20 1.6 L23.8 8 V27 H16.2 V8 Z" fill="#e3e9f2" stroke="#1b355c" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M20 8.5 V25.5" stroke="#8ea4c4" stroke-width="1.2"/>
+    <rect x="9.5" y="26.6" width="21" height="3.8" rx="1.9" fill="#2f5d9b" stroke="#1b355c" stroke-width="1"/>
+    <rect x="18.1" y="30.4" width="3.8" height="5.4" fill="#7a5230" stroke="#1b355c" stroke-width=".8"/>
+    <circle cx="20" cy="37.2" r="2.3" fill="#2f5d9b" stroke="#1b355c" stroke-width=".8"/>
+  </symbol>
+  <symbol id="s-bastoni" viewBox="0 0 40 40">
+    <g transform="rotate(24 20 20)">
+      <path d="M18 38 L15.6 9 Q15.4 2.6 20 2.4 Q24.6 2.6 24.4 9 L22 38 Q20 39.4 18 38 Z" fill="#4f8a43" stroke="#1f4720" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M15.9 13 L12.4 10.6 M24.1 19 L27.4 16.8 M16.5 24.5 L13.6 22.8 M23.4 30 L26 28.6" stroke="#1f4720" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M15.9 13 L12.4 10.6 M24.1 19 L27.4 16.8 M16.5 24.5 L13.6 22.8 M23.4 30 L26 28.6" stroke="#79b367" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M17.6 7 Q20 5.4 22.4 7" fill="none" stroke="#a7d08f" stroke-width="1" stroke-linecap="round"/>
+    </g>
+  </symbol>
+</svg>
+
+<header class="top">
+  <div class="brand"><h1>Scopa</h1><small>Das italienische Kartenspiel</small></div>
+  <div class="actions">
+    <button class="btn" data-act="rules">Regeln</button>
+    <button class="btn primary" data-act="new">Neues Spiel</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="table" aria-label="Spieltisch">
+    <div class="seat opp" id="seatOpp">
+      <div class="who"><div class="name"><span class="dot"></span>Computer</div><div class="tag" id="tag1"></div></div>
+      <div class="hand" id="oppHand"></div>
+      <div class="pile" id="pile1"></div>
+    </div>
+    <div class="center">
+      <div class="deck" id="deck"></div>
+      <div class="tablecards" id="tableCards"></div>
+      <div class="roundinfo" id="roundInfo"></div>
+    </div>
+    <div class="seat me" id="seatMe">
+      <div class="who"><div class="name"><span class="dot"></span>Du</div><div class="tag" id="tag0"></div></div>
+      <div class="hand" id="myHand"></div>
+      <div class="pile" id="pile0"></div>
+    </div>
+    <div class="bar">
+      <div class="status" id="status"></div>
+      <div class="opts" id="opts"></div>
+      <button class="btn dark" id="tipBtn" data-act="tip" title="Bester Zug laut Computer (Taste T)">Tipp</button>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div>
+      <div class="score">
+        <div><div class="num" id="sc0">0</div><div class="lbl">Du</div><div class="progress"><i id="pr0"></i></div></div>
+        <div class="vs">:</div>
+        <div><div class="num" id="sc1">0</div><div class="lbl">Computer</div><div class="progress"><i id="pr1"></i></div></div>
+      </div>
+      <div class="meta" id="meta"></div>
+    </div>
+    <div><h3 class="sec">Diese Runde</h3><table class="tally" id="tally"></table></div>
+    <div class="logwrap"><h3 class="sec">Verlauf</h3><div class="log" id="log"></div></div>
+    <div class="foot"><span id="statsLine"></span><button class="linkbtn" data-act="new">Einstellungen</button></div>
+  </aside>
+</main>
+
+<div id="banner"><span>Scopa!</span></div>
+
+<div class="overlay" id="ovSummary" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="sumTitle">
+    <h2 id="sumTitle"></h2>
+    <p class="sub" id="sumSub"></p>
+    <div id="sumBody"></div>
+    <div class="row-btns" id="sumBtns"></div>
+  </div>
+</div>
+
+<div class="overlay" id="ovNew" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="newTitle">
+    <h2 id="newTitle">Neues Spiel</h2>
+    <p class="sub">Du gegen den Computer. Die laufende Partie wird abgebrochen.</p>
+    <div class="field"><span>Spielen bis</span>
+      <div class="seg">
+        <input type="radio" name="target" id="t11" value="11"><label for="t11">11</label>
+        <input type="radio" name="target" id="t16" value="16"><label for="t16">16</label>
+        <input type="radio" name="target" id="t21" value="21"><label for="t21">21</label>
+      </div>
+    </div>
+    <div class="field"><span>Gegner</span>
+      <div class="seg">
+        <input type="radio" name="level" id="lEasy" value="easy"><label for="lEasy">Leicht</label>
+        <input type="radio" name="level" id="lNormal" value="normal"><label for="lNormal">Normal</label>
+        <input type="radio" name="level" id="lHard" value="hard"><label for="lHard">Schwer</label>
+      </div>
+      <div class="hint">Schwer zählt mit, welche Karten schon gefallen sind, und vermeidet es, dir eine Scopa aufzulegen.</div>
+    </div>
+    <div class="row-btns">
+      <button class="btn" data-act="close">Abbrechen</button>
+      <button class="btn primary" data-act="start">Spiel starten</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ovRules" hidden>
+  <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+    <h2 id="rulesTitle">Regeln</h2>
+    <p class="sub">Klassisches Scopa mit 40 italienischen Karten, zu zweit.</p>
+    <div class="rules">
+      <h4>Die Karten</h4>
+      <p>Vier Farben: Denari (Münzen), Coppe (Kelche), Spade (Schwerter), Bastoni (Stäbe). Werte 1–7, dazu Fante = 8, Cavallo = 9, Re = 10.</p>
+      <h4>Ablauf</h4>
+      <p>Zu Beginn liegen 4 Karten offen auf dem Tisch, jeder bekommt 3. Ihr spielt abwechselnd je eine Karte. Sind beide Hände leer, wird je 3 nachgegeben, bis der Stapel aufgebraucht ist. Wer nicht gibt, spielt zuerst; der Geber wechselt jede Runde.</p>
+      <h4>Stechen</h4>
+      <p>Liegt eine Karte mit gleichem Wert auf dem Tisch, nimmst du sie – das hat Vorrang. Sonst nimmst du mehrere Karten, deren Summe dem Wert deiner Karte entspricht. Kann deine Karte stechen, musst du stechen; kann sie es nicht, bleibt sie offen auf dem Tisch liegen.</p>
+      <h4>Scopa</h4>
+      <p>Räumst du den Tisch komplett ab, bekommst du sofort 1 Punkt. Ausnahme: der allerletzte Zug einer Runde zählt nicht als Scopa.</p>
+      <h4>Rundenende</h4>
+      <p>Die restlichen Tischkarten bekommt, wer zuletzt gestochen hat. Dann je 1 Punkt für: die meisten Karten · die meisten Denari · den Settebello (7 Denari) · die Primiera · plus jede Scopa. Bei Gleichstand gibt es den Punkt nicht.</p>
+      <h4>Primiera</h4>
+      <p>Pro Farbe zählt deine beste Karte, die vier Werte werden addiert. Wer nicht alle vier Farben hat, kann die Primiera nicht gewinnen.</p>
+      <div class="primtab"><span><b>7</b> = 21</span><span><b>6</b> = 18</span><span><b>Asso</b> = 16</span><span><b>5</b> = 15</span><span><b>4</b> = 14</span><span><b>3</b> = 13</span><span><b>2</b> = 12</span><span><b>Bildkarten</b> = 10</span></div>
+      <h4>Spielende</h4>
+      <p>Wer zuerst die Zielpunktzahl erreicht, gewinnt. Erreichen beide sie in derselben Runde, gewinnt die höhere Zahl; bei Gleichstand wird weitergespielt.</p>
+      <h4>Bedienung</h4>
+      <p>Handkarte anklicken, dann die Tischkarten anklicken, die du nehmen willst – oder unten eine Option wählen. Doppelklick spielt eine Karte direkt, wenn es nur eine Möglichkeit gibt. Tasten: <kbd>1</kbd>–<kbd>3</kbd> Karte wählen, <kbd>Enter</kbd> spielen, <kbd>Esc</kbd> abwählen, <kbd>T</kbd> Tipp.</p>
+    </div>
+    <div class="row-btns"><button class="btn primary" data-act="close">Alles klar</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= Data ================= */
+const SUITS = [
+  {key:'denari', name:'Denari'},
+  {key:'coppe', name:'Coppe'},
+  {key:'spade', name:'Spade'},
+  {key:'bastoni', name:'Bastoni'},
+];
+const STYLE = [
+  {main:'#b8871f', dark:'#6f4e10', tint:'#f6e8c3'},
+  {main:'#b3352b', dark:'#6e1c16', tint:'#f7ddd7'},
+  {main:'#2f5d9b', dark:'#1b355c', tint:'#dfe7f3'},
+  {main:'#3f7a3a', dark:'#1f4720', tint:'#e0ecd9'},
+];
+const FACE = {8:'Fante', 9:'Cavallo', 10:'Re'};
+const PRIM = {1:16, 2:12, 3:13, 4:14, 5:15, 6:18, 7:21, 8:10, 9:10, 10:10};
+const LEVELS = {
+  easy:   {label:'Leicht', look:0,   noise:3},
+  normal: {label:'Normal', look:.5,  noise:1},
+  hard:   {label:'Schwer', look:1,   noise:0},
+};
+const ALL = [];
+for (let s = 0; s < 4; s++) for (let r = 1; r <= 10; r++) ALL.push(Object.freeze({id:s*10 + r - 1, suit:s, rank:r}));
+
+const isSB = c => c.suit === 0 && c.rank === 7;
+const cardName = c => isSB(c) ? 'Settebello (7 di Denari)' : `${c.rank === 1 ? 'Asso' : (FACE[c.rank] || c.rank)} di ${SUITS[c.suit].name}`;
+
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* ================= Card artwork ================= */
+const PIPS = {
+  1:[[50,75]],
+  2:[[50,46],[50,104]],
+  3:[[50,40],[50,75],[50,110]],
+  4:[[34,46],[66,46],[34,104],[66,104]],
+  5:[[34,44],[66,44],[50,75],[34,106],[66,106]],
+  6:[[34,42],[66,42],[34,75],[66,75],[34,108],[66,108]],
+  7:[[34,42],[66,42],[50,58.5],[34,75],[66,75],[34,108],[66,108]],
+};
+const PIP_SIZE = {1:44, 2:26, 3:25, 4:24, 5:23, 6:21, 7:21};
+const faceCache = new Map();
+
+function faceSVG(c){
+  if (faceCache.has(c.id)) return faceCache.get(c.id);
+  const st = STYLE[c.suit], k = SUITS[c.suit].key;
+  const fs = c.rank === 10 ? 13.5 : 15.5;
+  const idx = `<text x="11.5" y="19.5" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${st.dark}" font-family="Georgia,serif">${c.rank}</text><use href="#s-${k}" x="5" y="23" width="13" height="13"/>`;
+  let s = `<svg viewBox="0 0 100 150" aria-hidden="true"><rect x=".75" y=".75" width="98.5" height="148.5" rx="8" fill="#fcf7ec" stroke="#cdbf9f" stroke-width="1.5"/>`
+        + `<rect x="4.5" y="4.5" width="91" height="141" rx="5.5" fill="none" stroke="${st.main}" stroke-opacity=".25"/>`
+        + idx + `<g transform="rotate(180 50 75)">${idx}</g>`;
+  if (c.rank <= 7){
+    const z = PIP_SIZE[c.rank];
+    if (c.rank === 1){
+      s += `<circle cx="50" cy="75" r="31" fill="${st.tint}" stroke="${st.main}" stroke-opacity=".5"/>`
+         + `<circle cx="50" cy="75" r="26.5" fill="none" stroke="${st.main}" stroke-opacity=".35" stroke-dasharray="2 3"/>`;
+    }
+    for (const [x, y] of PIPS[c.rank]) s += `<use href="#s-${k}" x="${x - z/2}" y="${y - z/2}" width="${z}" height="${z}"/>`;
+  } else {
+    s += figure(c, st, k);
+  }
+  s += '</svg>';
+  faceCache.set(c.id, s);
+  return s;
+}
+
+function figure(c, st, k){
+  let g = `<rect x="21" y="22" width="58" height="106" rx="4" fill="${st.tint}" stroke="${st.main}" stroke-width="1.2"/>`;
+  if (c.rank === 9){
+    g += `<path d="M33 112 L69 112 L66 99 Q63 86 68 74 Q74 60 69 47 Q63 35 51 34 L48 27 L44 35 Q36 38 33 49 L28 61 Q26 67 31 69 Q37 70 41 64 L47 61 Q45 73 39 83 Q33 94 33 112 Z" fill="${st.main}" stroke="${st.dark}" stroke-width="1.2" stroke-linejoin="round"/>`
+       + `<path d="M52 35.5 Q63.5 39 66.5 52 Q68.5 64 63.5 77" fill="none" stroke="#e8bb4a" stroke-width="2.6" stroke-linecap="round"/>`
+       + `<path d="M30.5 63 L45 56.5" stroke="#e8bb4a" stroke-width="1.4" stroke-linecap="round"/>`
+       + `<circle cx="47.5" cy="46" r="2" fill="#fcf7ec" stroke="${st.dark}" stroke-width=".8"/>`
+       + `<use href="#s-${k}" x="44" y="88" width="17" height="17"/>`;
+  } else {
+    g += `<path d="M33 112 L37.5 82 Q50 74 62.5 82 L67 112 Z" fill="${st.main}" stroke="${st.dark}" stroke-width="1.1" stroke-linejoin="round"/>`
+       + `<path d="M37.6 82 Q50 90 62.4 82" fill="none" stroke="#e8bb4a" stroke-width="1.8"/>`
+       + `<circle cx="50" cy="66" r="9" fill="#f2d5b0" stroke="#7a5a3a" stroke-width=".9"/>`
+       + `<circle cx="46.8" cy="65.6" r=".95" fill="#3a2a1a"/><circle cx="53.2" cy="65.6" r=".95" fill="#3a2a1a"/>`;
+    if (c.rank === 10){
+      g += `<path d="M43.2 70 Q50 82 56.8 70 Q50 73.5 43.2 70 Z" fill="#8a6a48"/>`
+         + `<path d="M40.5 60 L41.5 47.5 L45.8 53.5 L50 44.5 L54.2 53.5 L58.5 47.5 L59.5 60 Z" fill="#e8bb4a" stroke="#7a5512" stroke-width=".9" stroke-linejoin="round"/>`
+         + `<circle cx="41.5" cy="47.5" r="1.4" fill="#e8bb4a" stroke="#7a5512" stroke-width=".6"/>`
+         + `<circle cx="50" cy="44.5" r="1.5" fill="#e8bb4a" stroke="#7a5512" stroke-width=".6"/>`
+         + `<circle cx="58.5" cy="47.5" r="1.4" fill="#e8bb4a" stroke="#7a5512" stroke-width=".6"/>`;
+    } else {
+      g += `<path d="M40.5 63 Q40.5 52.5 50 52 Q59.5 52.5 59.5 63 Q50 59 40.5 63 Z" fill="${st.dark}"/>`
+         + `<path d="M56.5 55 Q68 44 64.5 33.5 Q61.5 46 53.5 53.5 Z" fill="#fcf3dc" stroke="${st.dark}" stroke-width=".8"/>`;
+    }
+    g += `<use href="#s-${k}" x="41" y="86" width="18" height="18"/>`;
+  }
+  g += `<text x="50" y="123.5" text-anchor="middle" font-size="7.5" letter-spacing="1.4" fill="${st.dark}" font-family="Georgia,serif">${FACE[c.rank].toUpperCase()}</text>`;
+  return g;
+}
+
+const BACK = `<svg viewBox="0 0 100 150" aria-hidden="true"><rect x=".75" y=".75" width="98.5" height="148.5" rx="8" fill="#7a1e2a" stroke="#4a111a" stroke-width="1.5"/><rect x="7" y="7" width="86" height="136" rx="4.5" fill="url(#pback)" stroke="#d9b765" stroke-opacity=".75" stroke-width="1.2"/><circle cx="50" cy="75" r="17" fill="#7a1e2a" stroke="#d9b765" stroke-width="1.4"/><text x="50" y="81.5" text-anchor="middle" font-size="19" font-style="italic" fill="#ecd18a" font-family="Georgia,serif">S</text></svg>`;
+
+const icon = k => `<svg class="ic" viewBox="0 0 40 40" aria-hidden="true"><use href="#s-${k}" width="40" height="40"/></svg>`;
+const mini = c => `<span class="mini s${c.suit}${isSB(c) ? ' sb' : ''}" title="${cardName(c)}"><b>${c.rank}</b>${icon(SUITS[c.suit].key)}</span>`;
+
+/* ================= Rules engine ================= */
+function captureOptions(rank, table){
+  const same = table.filter(c => c.rank === rank);
+  if (same.length) return same.map(c => [c]);           // gleicher Wert hat Vorrang
+  const res = [];
+  (function rec(i, sum, pick){
+    if (sum === rank){ if (pick.length >= 2) res.push(pick.slice()); return; }
+    for (let j = i; j < table.length; j++){
+      const c = table[j];
+      if (sum + c.rank > rank) continue;
+      pick.push(c); rec(j + 1, sum + c.rank, pick); pick.pop();
+    }
+  })(0, 0, []);
+  return res;
+}
+
+function tally(p){
+  const pile = S.piles[p];
+  let den = 0, sb = false, sevens = 0;
+  const best = [0,0,0,0];
+  for (const c of pile){
+    if (c.suit === 0) den++;
+    if (isSB(c)) sb = true;
+    if (c.rank === 7) sevens++;
+    best[c.suit] = Math.max(best[c.suit], PRIM[c.rank]);
+  }
+  const prim = best.every(b => b > 0) ? best.reduce((a, b) => a + b, 0) : null;
+  return {cards:pile.length, den, sb, sevens, prim, scope:S.scope[p]};
+}
+
+/* ================= State ================= */
+let S = null, gameSeq = 0, lastClick = null;
+const fresh = new Set();
+const settings = {target:11, level:'normal'};
+const stats = {won:0, lost:0};
+const STORE = 'scopa.v1';
+
+function load(){
+  try {
+    const d = JSON.parse(localStorage.getItem(STORE) || '{}');
+    if (d.settings){
+      if ([11,16,21].includes(d.settings.target)) settings.target = d.settings.target;
+      if (LEVELS[d.settings.level]) settings.level = d.settings.level;
+    }
+    if (d.stats){ stats.won = d.stats.won|0; stats.lost = d.stats.lost|0; }
+  } catch(e){}
+}
+function save(){ try { localStorage.setItem(STORE, JSON.stringify({settings, stats})); } catch(e){} }
+
+function addLog(html, cls){ S.log.unshift({html, cls}); if (S.log.length > 120) S.log.length = 120; }
+const canAct = () => !!S && S.phase === 'play' && S.turn === 0;
+const roundDone = () => !S.deck.length && !S.hands[0].length && !S.hands[1].length;
+
+function newGame(){
+  S = {id:++gameSeq, scores:[0,0], round:0, dealer:Math.random() < .5 ? 0 : 1,
+       target:settings.target, level:settings.level, log:[], phase:'init'};
+  startRound();
+}
+
+function startRound(){
+  S.round++;
+  if (S.round > 1) S.dealer = 1 - S.dealer;
+  let deck;
+  do { deck = shuffle(ALL.slice()); } while (deck.slice(0, 4).filter(c => c.rank === 10).length >= 3); // 3+ Re auf dem Tisch: neu mischen
+  const table = deck.splice(0, 4);
+  Object.assign(S, {deck, table, hands:[[],[]], piles:[[],[]], scope:[0,0], lastTaker:null,
+                    pending:null, sel:null, tsel:[], tip:null, summary:null});
+  S.turn = 1 - S.dealer;
+  table.forEach(c => fresh.add(c.id));
+  dealHands();
+  addLog(`Runde ${S.round}: ${S.dealer === 1 ? 'Der Computer gibt – du beginnst.' : 'Du gibst – der Computer beginnt.'}`, 'sys');
+  S.phase = 'play';
+  render();
+  maybeAI();
+}
+
+function dealHands(){
+  const first = 1 - S.dealer;
+  for (let i = 0; i < 3; i++) for (const p of [first, S.dealer]){
+    const c = S.deck.shift();
+    if (c){ S.hands[p].push(c); fresh.add(c.id); }
+  }
+  S.hands[0].sort((a, b) => a.rank - b.rank || a.suit - b.suit);
+}
+
+function playMove(p, card, capture){
+  if (!S || S.phase !== 'play' || S.turn !== p) return;
+  S.phase = 'anim';
+  S.pending = {p, card, capture};
+  S.sel = null; S.tsel = []; S.tip = null;
+  render();
+  const gid = S.id;
+  setTimeout(() => { if (S.id !== gid) return; S.pending = null; commit(p, card, capture); }, p === 1 ? 1050 : 560);
+}
+
+function commit(p, card, capture){
+  const h = S.hands[p];
+  h.splice(h.findIndex(c => c.id === card.id), 1);
+  let scopa = false;
+  if (capture.length){
+    const ids = new Set(capture.map(c => c.id));
+    S.table = S.table.filter(c => !ids.has(c.id));
+    S.piles[p].push(card, ...capture);
+    S.lastTaker = p;
+    if (!S.table.length && !roundDone()){ S.scope[p]++; scopa = true; }
+  } else {
+    S.table.push(card);
+  }
+  const who = p === 0 ? '<b>Du</b> spielst' : '<b>Computer</b> spielt';
+  if (capture.length){
+    const sb = [card, ...capture].some(isSB);
+    addLog(`${who} ${mini(card)} und ${p === 0 ? 'nimmst' : 'nimmt'} ${capture.map(mini).join(' ')}`
+      + (scopa ? ' <em>Scopa!</em>' : '') + (sb ? ' <span class="sbtag">Settebello</span>' : ''));
+  } else {
+    addLog(`${who} ${mini(card)} auf den Tisch`);
+  }
+  if (scopa) banner('Scopa!');
+  advance();
+}
+
+function advance(){
+  S.turn = 1 - S.turn;
+  if (!S.hands[0].length && !S.hands[1].length){
+    if (S.deck.length){
+      dealHands();
+      addLog(`Neue Karten – noch ${S.deck.length} im Stapel.`, 'sys');
+    } else {
+      endRound();
+      return;
+    }
+  }
+  S.phase = 'play';
+  render();
+  maybeAI();
+}
+
+function endRound(){
+  if (S.table.length){
+    if (S.lastTaker !== null){
+      const n = S.table.length;
+      S.piles[S.lastTaker].push(...S.table);
+      addLog(`${n === 1 ? 'Die letzte Tischkarte geht' : `Die restlichen ${n} Tischkarten gehen`} an ${S.lastTaker === 0 ? 'dich' : 'den Computer'}.`, 'sys');
+    }
+    S.table = [];
+  }
+  const t = [tally(0), tally(1)];
+  const pts = [0, 0], rows = [];
+  const cmp = (label, a, b, showA = a, showB = b) => {
+    const w = a > b ? 0 : b > a ? 1 : -1;
+    if (w >= 0) pts[w]++;
+    rows.push({label, a:showA, b:showB, w});
+  };
+  cmp('Karten', t[0].cards, t[1].cards);
+  cmp('Denari', t[0].den, t[1].den);
+  cmp('Settebello', +t[0].sb, +t[1].sb, t[0].sb ? '✓' : '–', t[1].sb ? '✓' : '–');
+  const pa = t[0].prim, pb = t[1].prim;
+  cmp('Primiera', pa ?? -1, pb ?? -1, pa ?? '–', pb ?? '–');
+  pts[0] += S.scope[0]; pts[1] += S.scope[1];
+  rows.push({label:'Scope', a:S.scope[0], b:S.scope[1], scope:true});
+  S.scores[0] += pts[0]; S.scores[1] += pts[1];
+  const [s0, s1] = S.scores;
+  let winner = null, overtime = false;
+  if (Math.max(s0, s1) >= S.target){
+    if (s0 !== s1) winner = s0 > s1 ? 0 : 1; else overtime = true;
+  }
+  S.summary = {rows, pts, winner, overtime, round:S.round};
+  addLog(`Runde ${S.round}: Du +${pts[0]}, Computer +${pts[1]} → ${s0} : ${s1}`, 'sys');
+  if (winner !== null){
+    if (winner === 0) stats.won++; else stats.lost++;
+    save();
+    S.phase = 'over';
+  } else {
+    S.phase = 'roundEnd';
+  }
+  render();
+  const gid = S.id;
+  setTimeout(() => { if (S.id === gid) openSummary(); }, 750);
+}
+
+/* ================= Computer player ================= */
+function worth(c){
+  let v = .38;                       // Karte zählt für "meiste Karten"
+  if (c.suit === 0) v += .7;         // Denari
+  if (isSB(c)) v += 7;               // Settebello
+  if (c.rank === 7) v += 1.5;        // Primiera
+  else if (c.rank === 6) v += .7;
+  else if (c.rank === 1) v += .4;
+  return v;
+}
+
+function unseenFor(p){
+  const seen = new Set();
+  for (const c of S.hands[p]) seen.add(c.id);
+  for (const c of S.table) seen.add(c.id);
+  for (const pile of S.piles) for (const c of pile) seen.add(c.id);
+  return ALL.filter(c => !seen.has(c.id));
+}
+
+function probHas(unseen, rank, h){
+  const n = unseen.length;
+  if (!n || !h) return 0;
+  let k = 0;
+  for (const c of unseen) if (c.rank === rank) k++;
+  if (!k) return 0;
+  if (h >= n) return 1;
+  let none = 1;
+  for (let i = 0; i < h; i++){ none *= (n - k - i) / (n - i); if (none <= 0) return 1; }
+  return 1 - none;
+}
+
+function legalMoves(p){
+  const moves = [];
+  for (const card of S.hands[p]){
+    const opts = captureOptions(card.rank, S.table);
+    if (!opts.length) moves.push({card, capture:[]});
+    else for (const o of opts) moves.push({card, capture:o});
+  }
+  return moves;
+}
+
+// Was kann der Gegner mit einer Karte vom Wert r aus diesem Tisch holen?
+function oppGain(after, r, lastNext){
+  const opts = captureOptions(r, after);
+  if (!opts.length) return 0;
+  if (lastNext) return after.reduce((a, c) => a + worth(c), 0) + .5;   // letzter Stich nimmt alles mit
+  let best = 0;
+  for (const o of opts){
+    let g = .55 + (r === 7 ? 1.5 : r === 6 ? .7 : r === 1 ? .4 : 0);  // gespielte Karte, Farbe unbekannt
+    for (const c of o) g += worth(c);
+    if (o.length === after.length) g += 8;
+    if (g > best) best = g;
+  }
+  return best;
+}
+
+// Erwarteter Wert der besten Antwort des Gegners (aus den noch unbekannten Karten geschätzt)
+function expectedOppBest(after, unseen, oh, lastNext){
+  const items = [];
+  for (let r = 1; r <= 10; r++){
+    const g = oppGain(after, r, lastNext);
+    if (g > 0) items.push([g, probHas(unseen, r, oh)]);
+  }
+  items.sort((a, b) => b[0] - a[0]);
+  let e = 0, none = 1;
+  for (const [g, pr] of items){ e += g * pr * none; none *= 1 - pr; }
+  return e;
+}
+
+function evaluate(p, m, L, unseen){
+  const {card, capture} = m;
+  let v = 0;
+  const capIds = new Set(capture.map(c => c.id));
+  const after = capture.length ? S.table.filter(c => !capIds.has(c.id)) : S.table.concat(card);
+  const lastPlay = !S.deck.length && S.hands[p].length === 1 && !S.hands[1 - p].length;
+  if (capture.length){
+    v += worth(card);
+    for (const c of capture) v += worth(c);
+    if (!after.length && !lastPlay) v += 8;
+  } else {
+    v -= worth(card) * .35;
+  }
+  if (lastPlay){
+    const taker = capture.length ? p : S.lastTaker;
+    const w = after.reduce((a, c) => a + worth(c), 0);
+    if (taker === p) v += w; else if (taker === 1 - p) v -= w;
+  } else if (after.length && L.look){
+    let oh = S.hands[1 - p].length;
+    if (!oh && S.deck.length) oh = 3;
+    if (oh){
+      const lastNext = !S.deck.length && oh === 1 && S.hands[p].length === 1;
+      v -= L.look * expectedOppBest(after, unseen, oh, lastNext);
+    }
+  }
+  if (L.noise) v += (Math.random() - .5) * L.noise;
+  return v;
+}
+
+function chooseMove(p, levelKey){
+  const L = LEVELS[levelKey] || LEVELS.normal;
+  const unseen = unseenFor(p);
+  let best = null, bestV = -Infinity;
+  for (const m of legalMoves(p)){
+    const v = evaluate(p, m, L, unseen);
+    if (v > bestV){ bestV = v; best = m; }
+  }
+  return best;
+}
+
+function maybeAI(){
+  if (!S || S.phase !== 'play' || S.turn !== 1) return;
+  const gid = S.id;
+  setTimeout(() => {
+    if (!S || S.id !== gid || S.phase !== 'play' || S.turn !== 1) return;
+    const m = chooseMove(1, S.level);
+    if (m) playMove(1, m.card, m.capture);
+  }, 750);
+}
+
+/* ================= Rendering ================= */
+const $ = s => document.querySelector(s);
+
+function render(){
+  if (!S) return;
+  const P = S.pending;
+  let fi = 0;
+  const fx = id => fresh.has(id) ? [' fresh', ` style="animation-delay:${(fi++) * 65}ms"`] : ['', ''];
+
+  // Tisch
+  let sel = null, opts = null;
+  if (canAct() && S.sel != null){
+    sel = S.hands[0].find(c => c.id === S.sel) || null;
+    if (sel) opts = captureOptions(sel.rank, S.table);
+  }
+  const pick = new Set(opts ? opts.flat().map(c => c.id) : []);
+  const take = new Set(P ? P.capture.map(c => c.id) : []);
+  const tipc = new Set(S.tip ? S.tip.cap : []);
+  let th = S.table.map(c => {
+    let cls = 'card';
+    if (take.has(c.id)) cls += ' taking';
+    if (opts && opts.length){
+      cls += pick.has(c.id) ? ' pickable' : ' dim';
+      if (S.tsel.includes(c.id)) cls += ' picked';
+    }
+    if (tipc.has(c.id)) cls += ' tipcap';
+    const [fc, fs] = fx(c.id);
+    return `<div class="${cls}${fc}"${fs} data-table="${c.id}" title="${cardName(c)}">${faceSVG(c)}</div>`;
+  }).join('');
+  if (P) th += `<div class="card incoming ${P.p === 1 ? 'from-top' : 'from-bottom'}" title="${cardName(P.card)}">${faceSVG(P.card)}</div>`;
+  if (!th) th = `<div class="empty">${S.phase === 'play' ? 'Der Tisch ist leer' : ''}</div>`;
+  $('#tableCards').innerHTML = th;
+
+  // Hände
+  $('#oppHand').innerHTML = S.hands[1].filter(c => !P || P.card.id !== c.id).map(c => {
+    const [fc, fs] = fx(c.id);
+    return `<div class="card back${fc}"${fs}>${BACK}</div>`;
+  }).join('');
+  const mh = $('#myHand');
+  mh.classList.toggle('locked', !canAct());
+  mh.innerHTML = S.hands[0].filter(c => !P || P.card.id !== c.id).map((c, i) => {
+    let cls = 'card';
+    if (S.sel === c.id && canAct()) cls += ' sel';
+    if (S.tip && S.tip.card === c.id) cls += ' tip';
+    const [fc, fs] = fx(c.id);
+    return `<div class="${cls}${fc}"${fs} data-hand="${c.id}" title="${cardName(c)} · Taste ${i + 1}">${faceSVG(c)}</div>`;
+  }).join('');
+  fresh.clear();
+
+  // Sitze, Stapel
+  const playing = S.phase === 'play' || S.phase === 'anim';
+  for (const p of [0, 1]){
+    const active = playing && S.turn === p;
+    (p === 0 ? $('#seatMe') : $('#seatOpp')).classList.toggle('active', active);
+    $('#tag' + p).innerHTML = (S.dealer === p ? '<span class="badge">Geber</span>' : '') + (active ? '<span class="turn">am Zug</span>' : '');
+    const n = S.piles[p].length, sc = S.scope[p];
+    $('#pile' + p).innerHTML =
+      `<div class="stack">${n ? `<div class="card back">${BACK}</div>` + (n > 1 ? `<div class="card back">${BACK}</div>` : '') : '<div class="slot"></div>'}</div>`
+      + `<div class="count">${n} Karte${n === 1 ? '' : 'n'}</div>`
+      + (sc ? `<div class="scopes">${'<i></i>'.repeat(Math.min(sc, 6))}<span>${sc} Scop${sc === 1 ? 'a' : 'e'}</span></div>` : '');
+  }
+  const dn = S.deck.length;
+  $('#deck').innerHTML = dn
+    ? `<div class="stack">${`<div class="card back">${BACK}</div>`.repeat(Math.min(3, Math.ceil(dn / 8)))}</div><div class="count">${dn} im Stapel</div>`
+    : `<div class="stack"><div class="slot"></div></div><div class="count">Stapel leer</div>`;
+  $('#roundInfo').innerHTML = `Zuletzt gestochen<br><b>${S.lastTaker === null ? '–' : (S.lastTaker === 0 ? 'Du' : 'Computer')}</b>`;
+
+  renderBar(sel, opts);
+  renderPanel();
+}
+
+function renderBar(sel, opts){
+  let s = '', o = '';
+  if (S.phase === 'roundEnd' || S.phase === 'over'){
+    s = S.phase === 'over' ? 'Partie beendet.' : 'Runde beendet.';
+    o = `<button class="chip plain" data-act="summary">Auswertung anzeigen</button>`;
+  } else if (S.phase === 'anim'){
+    s = S.pending && S.pending.p === 1 ? 'Der Computer spielt …' : '&nbsp;';
+  } else if (S.turn === 1){
+    s = 'Der Computer überlegt …';
+  } else if (!sel){
+    s = '<b>Du bist am Zug.</b> Wähle eine Karte aus deiner Hand.';
+  } else if (!opts.length){
+    s = `${S.tip ? '<b>Tipp:</b> ' : ''}${mini(sel)} kann nichts stechen.`;
+    o = `<button class="chip plain${S.tip ? ' rec' : ''}" data-discard="1">Auf den Tisch legen</button>`;
+  } else {
+    const last = !S.deck.length && S.hands[0].length === 1 && !S.hands[1].length;
+    s = `${S.tip ? '<b>Tipp:</b> ' : ''}${mini(sel)} sticht – ${opts.length > 1 ? 'wähle eine Möglichkeit oder klicke die Tischkarten an:' : 'klicke die Tischkarte an oder hier:'}`;
+    o = opts.map((op, i) => {
+      const rec = S.tip && S.tip.card === sel.id && S.tip.cap.length === op.length && op.every(c => S.tip.cap.includes(c.id));
+      const sweep = op.length === S.table.length && !last;
+      return `<button class="chip${rec ? ' rec' : ''}" data-opt="${i}">${op.map(mini).join('<span class="plus">+</span>')}${sweep ? '<span class="sc">Scopa</span>' : ''}</button>`;
+    }).join('');
+  }
+  $('#status').innerHTML = s;
+  $('#opts').innerHTML = o;
+  $('#tipBtn').disabled = !canAct();
+}
+
+function renderPanel(){
+  for (const p of [0, 1]){
+    $('#sc' + p).textContent = S.scores[p];
+    $('#pr' + p).style.width = Math.min(100, S.scores[p] / S.target * 100) + '%';
+  }
+  $('#meta').innerHTML = `<span>Runde ${S.round}</span><span>bis ${S.target}</span><span>Gegner: ${LEVELS[S.level].label}</span>`;
+  const t = [tally(0), tally(1)];
+  const row = (label, a, b, na = a, nb = b) =>
+    `<tr><td>${label}</td><td class="${na > nb ? 'lead' : ''}">${a}</td><td class="${nb > na ? 'lead' : ''}">${b}</td></tr>`;
+  $('#tally').innerHTML = `<tr><th></th><th>Du</th><th>Comp.</th></tr>`
+    + row('Karten', t[0].cards, t[1].cards)
+    + row('Denari', t[0].den, t[1].den)
+    + row('Settebello', t[0].sb ? '✓' : '–', t[1].sb ? '✓' : '–', +t[0].sb, +t[1].sb)
+    + row('Siebener', t[0].sevens, t[1].sevens)
+    + row('Primiera', t[0].prim ?? '–', t[1].prim ?? '–', t[0].prim ?? 0, t[1].prim ?? 0)
+    + row('Scope', t[0].scope, t[1].scope);
+  $('#log').innerHTML = S.log.map(e => `<div class="${e.cls || ''}">${e.html}</div>`).join('');
+  $('#statsLine').textContent = `Bilanz: ${stats.won} ${stats.won === 1 ? 'Sieg' : 'Siege'} · ${stats.lost} ${stats.lost === 1 ? 'Niederlage' : 'Niederlagen'}`;
+}
+
+function banner(text){
+  const b = $('#banner');
+  b.querySelector('span').textContent = text;
+  b.classList.remove('show');
+  void b.offsetWidth;
+  b.classList.add('show');
+}
+
+function openSummary(){
+  const sm = S && S.summary;
+  if (!sm) return;
+  const [s0, s1] = S.scores;
+  let title, sub;
+  if (sm.winner === 0){ title = 'Gewonnen!'; sub = `Du schlägst den Computer ${s0} : ${s1}.`; }
+  else if (sm.winner === 1){ title = 'Verloren.'; sub = `Der Computer gewinnt ${s1} : ${s0}.`; }
+  else {
+    title = `Runde ${sm.round}`;
+    sub = sm.overtime ? `Gleichstand bei ${s0} : ${s1} – es geht in die Verlängerung.` : `Gespielt wird bis ${S.target} Punkte.`;
+  }
+  $('#sumTitle').textContent = title;
+  $('#sumSub').textContent = sub;
+  const badge = n => n ? `<i>+${n}</i>` : '';
+  let body = `<table class="sum"><thead><tr><th></th><th>Du</th><th>Computer</th></tr></thead><tbody>`;
+  for (const r of sm.rows){
+    if (r.scope){
+      body += `<tr><td>Scope</td><td class="${r.a ? 'win' : ''}">${r.a}${badge(r.a)}</td><td class="${r.b ? 'win' : ''}">${r.b}${badge(r.b)}</td></tr>`;
+    } else {
+      body += `<tr><td>${r.label}</td><td class="${r.w === 0 ? 'win' : ''}">${r.a}${r.w === 0 ? badge(1) : ''}</td><td class="${r.w === 1 ? 'win' : ''}">${r.b}${r.w === 1 ? badge(1) : ''}</td></tr>`;
+    }
+  }
+  body += `<tr class="total"><td>Diese Runde</td><td>+${sm.pts[0]}</td><td>+${sm.pts[1]}</td></tr>`
+        + `<tr class="total grand"><td>Gesamt</td><td>${s0}</td><td>${s1}</td></tr></tbody></table>`;
+  $('#sumBody').innerHTML = body;
+  $('#sumBtns').innerHTML = S.phase === 'over'
+    ? `<button class="btn" data-act="new">Einstellungen</button><button class="btn primary" data-act="again">Noch eine Partie</button>`
+    : `<button class="btn primary" data-act="next">Nächste Runde</button>`;
+  $('#ovSummary').hidden = false;
+}
+
+/* ================= Interaction ================= */
+function selectedInfo(){
+  const card = S.sel != null ? S.hands[0].find(c => c.id === S.sel) : null;
+  return card ? {card, opts:captureOptions(card.rank, S.table)} : null;
+}
+
+function onHandClick(id, detail){
+  if (!canAct()) return;
+  if (detail >= 2 && lastClick === id){ lastClick = null; quickPlay(id); return; }
+  lastClick = id;
+  S.tip = null;
+  S.sel = S.sel === id ? null : id;
+  S.tsel = [];
+  render();
+}
+
+function quickPlay(id){
+  if (!canAct()) return;
+  const card = S.hands[0].find(c => c.id === id);
+  if (!card) return;
+  const opts = captureOptions(card.rank, S.table);
+  if (opts.length <= 1) playMove(0, card, opts[0] || []);
+  else { S.sel = id; S.tsel = []; render(); }
+}
+
+function shake(sel){
+  const el = document.querySelector(sel);
+  if (!el) return;
+  el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 350);
+}
+
+function onTableClick(id){
+  if (!canAct()) return;
+  const info = selectedInfo();
+  if (!info){
+    $('#status').innerHTML = '<b>Erst eine Handkarte wählen</b>, dann die Tischkarten anklicken.';
+    return;
+  }
+  if (!info.opts.length){ shake(`[data-table="${id}"]`); return; }
+  const next = S.tsel.includes(id) ? S.tsel.filter(x => x !== id) : S.tsel.concat(id);
+  const compatible = info.opts.filter(o => next.every(x => o.some(c => c.id === x)));
+  if (!compatible.length){ shake(`[data-table="${id}"]`); return; }
+  const exact = compatible.find(o => o.length === next.length);
+  if (exact){ playMove(0, info.card, exact); return; }
+  S.tsel = next;
+  render();
+}
+
+function onOpt(i){
+  if (!canAct()) return;
+  const info = selectedInfo();
+  if (info && info.opts[i]) playMove(0, info.card, info.opts[i]);
+}
+
+function onDiscard(){
+  if (!canAct()) return;
+  const info = selectedInfo();
+  if (info && !info.opts.length) playMove(0, info.card, []);
+}
+
+function giveTip(){
+  if (!canAct()) return;
+  const m = chooseMove(0, 'hard');
+  if (!m) return;
+  S.tip = {card:m.card.id, cap:m.capture.map(c => c.id)};
+  S.sel = m.card.id;
+  S.tsel = [];
+  render();
+}
+
+function highlightOpt(i){
+  document.querySelectorAll('.tablecards .hov').forEach(el => el.classList.remove('hov'));
+  if (i == null || !canAct()) return;
+  const info = selectedInfo();
+  const op = info && info.opts[i];
+  if (op) op.forEach(c => { const el = document.querySelector(`[data-table="${c.id}"]`); if (el) el.classList.add('hov'); });
+}
+
+function openNew(){
+  const t = document.querySelector(`input[name=target][value="${settings.target}"]`);
+  const l = document.querySelector(`input[name=level][value="${settings.level}"]`);
+  if (t) t.checked = true;
+  if (l) l.checked = true;
+  $('#ovNew').hidden = false;
+}
+
+function startFromDialog(){
+  const t = document.querySelector('input[name=target]:checked');
+  const l = document.querySelector('input[name=level]:checked');
+  if (t) settings.target = +t.value;
+  if (l) settings.level = l.value;
+  save();
+  document.querySelectorAll('.overlay').forEach(o => o.hidden = true);
+  newGame();
+}
+
+function onAct(a, el){
+  switch (a){
+    case 'rules': $('#ovRules').hidden = false; break;
+    case 'new': openNew(); break;
+    case 'close': { const ov = el && el.closest('.overlay'); if (ov) ov.hidden = true; break; }
+    case 'start': startFromDialog(); break;
+    case 'tip': giveTip(); break;
+    case 'summary': openSummary(); break;
+    case 'next': if (S && S.phase === 'roundEnd'){ $('#ovSummary').hidden = true; startRound(); } break;
+    case 'again': if (S && S.phase === 'over'){ document.querySelectorAll('.overlay').forEach(o => o.hidden = true); newGame(); } break;
+  }
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-hand],[data-table],[data-opt],[data-discard],[data-act]');
+  if (!t) return;
+  if (t.tagName === 'BUTTON') t.blur();
+  if (t.dataset.hand != null) onHandClick(+t.dataset.hand, e.detail);
+  else if (t.dataset.table != null) onTableClick(+t.dataset.table);
+  else if (t.dataset.opt != null) onOpt(+t.dataset.opt);
+  else if (t.dataset.discard != null) onDiscard();
+  else onAct(t.dataset.act, t);
+});
+document.addEventListener('dblclick', e => {
+  const t = e.target.closest('[data-hand]');
+  if (t) quickPlay(+t.dataset.hand);
+});
+$('#opts').addEventListener('mouseover', e => {
+  const c = e.target.closest('[data-opt]');
+  highlightOpt(c ? +c.dataset.opt : null);
+});
+$('#opts').addEventListener('mouseleave', () => highlightOpt(null));
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => {
+  if (e.target === o && o.id !== 'ovSummary') o.hidden = true;
+}));
+
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const newOpen = !$('#ovNew').hidden, rulesOpen = !$('#ovRules').hidden, sumOpen = !$('#ovSummary').hidden;
+  if (newOpen || rulesOpen){
+    if (e.key === 'Escape') (newOpen ? $('#ovNew') : $('#ovRules')).hidden = true;
+    else if (e.key === 'Enter' && newOpen){ e.preventDefault(); startFromDialog(); }
+    return;
+  }
+  if (sumOpen){
+    if (e.key === 'Enter'){ e.preventDefault(); onAct(S.phase === 'over' ? 'again' : 'next'); }
+    return;
+  }
+  if (!S) return;
+  if (/^[1-9]$/.test(e.key)){
+    const visible = S.hands[0];
+    const c = visible[+e.key - 1];
+    if (c) onHandClick(c.id, 1);
+  } else if (e.key === 'Enter'){
+    if (canAct() && S.sel != null){ e.preventDefault(); quickPlay(S.sel); }
+  } else if (e.key === 'Escape'){
+    if (S.sel != null){ S.sel = null; S.tsel = []; S.tip = null; render(); }
+  } else if (e.key === 't' || e.key === 'T'){
+    giveTip();
+  }
+});
+
+/* ================= Start ================= */
+load();
+newGame();
+})();
+</script>
+</body>
+</html>
