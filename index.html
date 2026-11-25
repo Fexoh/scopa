@@ -134,7 +134,7 @@ main.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22
 }
 .card svg{display:block;width:100%;height:100%}
 .card.ghost{visibility:hidden}
-.me .hand .card{cursor:pointer}
+.me .hand .card{cursor:grab;touch-action:none}
 .me .hand .card.sel{transform:translateY(-20px);box-shadow:0 0 0 3px var(--brass-hi),0 14px 24px rgba(0,0,0,.38)}
 .me .hand.locked .card{cursor:default;filter:brightness(.9)}
 .card.tip{animation:tipPulse 1.2s ease-in-out infinite}
@@ -146,6 +146,9 @@ main.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22
 }
 
 .tablecards{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:12px;padding:14px;min-height:calc(var(--ch) + 30px);border-radius:18px;border:1px dashed rgba(244,236,218,.14)}
+.tablecards{transition:border-color .15s,background-color .15s}
+.tablecards.drop-ok{border:1.5px dashed rgba(255,217,121,.85);background:rgba(255,217,121,.07)}
+.fly.dragging{box-shadow:0 0 0 3px var(--brass-hi),0 20px 36px rgba(0,0,0,.45);cursor:grabbing}
 .tablecards .empty{font-style:italic;color:rgba(244,236,218,.4);font-size:17px}
 .tablecards .card.pickable{cursor:pointer;box-shadow:0 0 0 2px rgba(255,217,121,.6),0 6px 14px rgba(0,0,0,.22)}
 .tablecards .card.picked,.tablecards .card.hov{transform:translateY(-8px);box-shadow:0 0 0 3px var(--brass-hi),0 12px 22px rgba(0,0,0,.35)}
@@ -428,6 +431,7 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
       <option value="de">DE</option>
       <option value="it">IT</option>
       <option value="en">EN</option>
+      <option value="sh">SH</option>
     </select>
     <button class="btn icon-c" data-act="rules" data-i18n-aria="rules">
       <span class="txt" data-i18n="rules">Regeln</span>
@@ -568,6 +572,7 @@ const isSB = c => c.suit === 0 && c.rank === 7;
 
 /* ================= Texts (DE / IT / EN) ================= */
 const SHARE = `<svg class="share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="⬆"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M8 11H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-2"/></svg>`;
+const pl = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : (a >= 2 && a <= 4 && (b < 12 || b > 14)) ? few : many; };
 const sec = (h, p) => `<h4>${h}</h4><p>${p}</p>`;
 const primTab = (ace, faces) => `<div class="primtab"><span><b>7</b> = 21</span><span><b>6</b> = 18</span><span><b>${ace}</b> = 16</span><span><b>5</b> = 15</span><span><b>4</b> = 14</span><span><b>3</b> = 13</span><span><b>2</b> = 12</span><span><b>${faces}</b> = 10</span></div>`;
 
@@ -584,7 +589,8 @@ const I18N = {
     stCompPlays:'Der Computer spielt …', stCompThinks:'Der Computer überlegt …',
     stYourTurn:'<b>Du bist am Zug.</b> Wähle eine Karte aus deiner Hand.',
     tipPrefix:'<b>Tipp:</b> ',
-    stCant:c => `${c} kann nichts stechen:`, putDown:'Auf den Tisch legen',
+    stCant:c => `${c} kann nichts stechen – aufs Spielfeld tippen oder ziehen:`, putDown:'Auf den Tisch legen',
+    mustCapture:c => `<b>${c} muss stechen</b> – sie kann nicht abgelegt werden.`,
     stOne:c => `${c} sticht – Karte nochmal wählen oder:`,
     stMany:c => `${c} sticht – wähle, was du nimmst:`,
     stSelectFirst:'<b>Wähle zuerst eine Handkarte</b>, dann die Tischkarten.',
@@ -616,7 +622,7 @@ const I18N = {
       + sec('Primiera', 'Pro Farbe zählt deine beste Karte, die vier Werte werden addiert. Wer nicht alle vier Farben hat, kann die Primiera nicht gewinnen.')
       + primTab('Ass', 'Bildkarten')
       + sec('Spielende', 'Wer zuerst die Zielpunktzahl erreicht, gewinnt. Erreichen beide sie in derselben Runde, gewinnt die höhere Zahl; bei Gleichstand wird weitergespielt.')
-      + sec('Bedienung', 'Wähle eine Handkarte und dann die Tischkarten, die du nehmen willst – oder eine der Optionen unten. Gibt es nur eine Möglichkeit, spielt ein zweites Antippen der Karte sie direkt. Tasten: <kbd>1</kbd>–<kbd>3</kbd> Karte wählen, <kbd>Enter</kbd> spielen, <kbd>Esc</kbd> abwählen, <kbd>T</kbd> Tipp.'),
+      + sec('Bedienung', 'Wähle eine Handkarte und dann die Tischkarten, die du nehmen willst – oder eine der Optionen unten. Du kannst die Karte auch aufs Spielfeld oder direkt auf eine Tischkarte ziehen. Kann sie nichts stechen, legst du sie ab, indem du nach der Auswahl aufs Spielfeld tippst. Gibt es nur eine Möglichkeit, spielt ein zweites Antippen der Karte sie direkt. Tasten: <kbd>1</kbd>–<kbd>3</kbd> Karte wählen, <kbd>Enter</kbd> spielen, <kbd>Esc</kbd> abwählen, <kbd>T</kbd> Tipp.'),
     installTitle:'Scopa als App', installBtn:'Installieren',
     installText:'Startet wie eine App und läuft auch offline.',
     installIOS:`Tippe auf <b>Teilen</b> ${SHARE} → <b>„Zum Home-Bildschirm“</b>. Läuft dann auch offline.`,
@@ -635,7 +641,8 @@ const I18N = {
     stCompPlays:'Il computer gioca …', stCompThinks:'Il computer ci pensa …',
     stYourTurn:'<b>Tocca a te.</b> Scegli una carta dalla tua mano.',
     tipPrefix:'<b>Consiglio:</b> ',
-    stCant:c => `${c} non può prendere nulla:`, putDown:'Metti sul tavolo',
+    stCant:c => `${c} non può prendere – tocca il tavolo o trascinala lì:`, putDown:'Metti sul tavolo',
+    mustCapture:c => `<b>${c} deve prendere</b> – non si può scartare.`,
     stOne:c => `${c} prende – seleziona di nuovo la carta oppure:`,
     stMany:c => `${c} prende – scegli cosa prendere:`,
     stSelectFirst:'<b>Scegli prima una carta dalla mano</b>, poi le carte sul tavolo.',
@@ -667,7 +674,7 @@ const I18N = {
       + sec('Primiera', 'Per ogni seme conta la tua carta migliore; si sommano i quattro valori. Chi non ha tutti e quattro i semi non può vincere la primiera.')
       + primTab('Asso', 'Figure')
       + sec('Fine della partita', 'Vince chi raggiunge per primo il punteggio stabilito. Se lo raggiungono entrambi nella stessa mano vince chi ha di più; in caso di parità si continua.')
-      + sec('Comandi', 'Scegli una carta dalla mano e poi le carte del tavolo che vuoi prendere – oppure una delle opzioni in basso. Se c’è una sola possibilità, toccare di nuovo la carta la gioca subito. Tasti: <kbd>1</kbd>–<kbd>3</kbd> scegli la carta, <kbd>Invio</kbd> gioca, <kbd>Esc</kbd> annulla, <kbd>T</kbd> consiglio.'),
+      + sec('Comandi', 'Scegli una carta dalla mano e poi le carte del tavolo che vuoi prendere – oppure una delle opzioni in basso. Puoi anche trascinare la carta sul tavolo o direttamente sulla carta da prendere. Se non può prendere nulla, scartala toccando il tavolo dopo averla scelta. Se c’è una sola possibilità, toccare di nuovo la carta la gioca subito. Tasti: <kbd>1</kbd>–<kbd>3</kbd> scegli la carta, <kbd>Invio</kbd> gioca, <kbd>Esc</kbd> annulla, <kbd>T</kbd> consiglio.'),
     installTitle:'Scopa come app', installBtn:'Installa',
     installText:"Si apre come un'app e funziona anche offline.",
     installIOS:`Tocca <b>Condividi</b> ${SHARE} → <b>«Aggiungi alla schermata Home»</b>. Funziona anche offline.`,
@@ -686,7 +693,8 @@ const I18N = {
     stCompPlays:'The computer is playing …', stCompThinks:'The computer is thinking …',
     stYourTurn:'<b>Your turn.</b> Pick a card from your hand.',
     tipPrefix:'<b>Hint:</b> ',
-    stCant:c => `${c} can’t capture anything:`, putDown:'Put it on the table',
+    stCant:c => `${c} can’t capture – tap the table or drag it there:`, putDown:'Put it on the table',
+    mustCapture:c => `<b>${c} must capture</b> – it can’t be put down.`,
     stOne:c => `${c} captures – select it again or:`,
     stMany:c => `${c} captures – choose what to take:`,
     stSelectFirst:'<b>Select a hand card first</b>, then the table cards.',
@@ -718,12 +726,65 @@ const I18N = {
       + sec('Primiera', 'For each suit your best card counts; the four values are added up. A player missing a suit can’t win the Primiera.')
       + primTab('Ace', 'Face cards')
       + sec('End of the game', 'The first to reach the target score wins. If both reach it in the same round, the higher score wins; on a tie, play continues.')
-      + sec('Controls', 'Select a hand card, then the table cards you want to take – or one of the options below. If there’s only one possibility, tapping the card again plays it. Keys: <kbd>1</kbd>–<kbd>3</kbd> select a card, <kbd>Enter</kbd> play, <kbd>Esc</kbd> deselect, <kbd>T</kbd> hint.'),
+      + sec('Controls', 'Select a hand card, then the table cards you want to take – or one of the options below. You can also drag the card onto the table or straight onto a card to capture. If it can’t capture, put it down by tapping the table after selecting it. If there’s only one possibility, tapping the card again plays it. Keys: <kbd>1</kbd>–<kbd>3</kbd> select a card, <kbd>Enter</kbd> play, <kbd>Esc</kbd> deselect, <kbd>T</kbd> hint.'),
     installTitle:'Scopa as an app', installBtn:'Install',
     installText:'Opens like an app and works offline.',
     installIOS:`Tap <b>Share</b> ${SHARE} → <b>“Add to Home Screen”</b>. Works offline too.`,
     installMac:'In Safari: <b>File → Add to Dock</b>. Works offline too.',
     installLink:'Install as app',
+  },
+  sh: {
+    tagline:'Klasična kartaška igra',
+    rules:'Pravila', newGame:'Nova igra', scoreBtn:'Rezultat i tok igre', close:'Zatvori', langAria:'Jezik', tableAria:'Polje za igru',
+    you:'Ti', computer:'Kompjuter', compShort:'Komp.', dealer:'Dijeli', toPlay:'na potezu',
+    tip:'Savjet',
+    suits:['Dinari', 'Kupe', 'Špade', 'Bate'], faces:{8:'Fanat', 9:'Konj', 10:'Kralj'},
+    deckCount:n => `${n} u špilu`, deckEmpty:'Špil je prazan',
+    cards:n => `${n} ${pl(n, 'karta', 'karte', 'karata')}`, scopeN:n => `${n} ${pl(n, 'scopa', 'scope', 'scopa')}`,
+    lastTaker:'Posljednji uzeo', tableEmpty:'Na polju nema karata',
+    stRoundOver:'Runda je gotova.', stGameOver:'Partija je gotova.', showSummary:'Prikaži rezultat',
+    stCompPlays:'Kompjuter igra …', stCompThinks:'Kompjuter razmišlja …',
+    stYourTurn:'<b>Ti si na potezu.</b> Izaberi kartu iz ruke.',
+    tipPrefix:'<b>Savjet:</b> ',
+    stCant:c => `${c} ne može ništa uzeti – dodirni polje ili je povuci na njega:`, putDown:'Odloži na polje',
+    mustCapture:c => `<b>${c} mora uzeti</b> – ne može se odložiti.`,
+    stOne:c => `${c} uzima – dodirni kartu još jednom ili:`,
+    stMany:c => `${c} uzima – izaberi karte koje uzimaš:`,
+    stSelectFirst:'<b>Prvo izaberi kartu iz ruke</b>, zatim karte na polju.',
+    thisRound:'Ova runda', history:'Tok igre', round:n => `Runda ${n}`, upTo:n => `do ${n}`, opponent:l => `Protivnik: ${l}`,
+    lvl_easy:'Lako', lvl_normal:'Normalno', lvl_hard:'Teško',
+    rowCards:'Karte', rowDenari:'Dinari', rowSettebello:'Settebello', rowSevens:'Sedmice', rowPrimiera:'Primiera', rowScope:'Scope',
+    stats:(w, l) => `Pobjede: ${w} · Porazi: ${l}`,
+    settings:'Postavke',
+    ace:'As', cardName:(r, s) => `${r} ${s}`, settebelloName:'Settebello (sedmica dinara)', key:n => `[${n}]`,
+    logStart:(r, compDeals) => `Runda ${r}: ${compDeals ? 'Kompjuter dijeli – ti počinješ.' : 'Ti dijeliš – kompjuter počinje.'}`,
+    logCapture:(p, c, cs) => p === 0 ? `<b>Ti</b> igraš ${c} i uzimaš ${cs}` : `<b>Kompjuter</b> igra ${c} i uzima ${cs}`,
+    logDiscard:(p, c) => p === 0 ? `<b>Ti</b> odlažeš ${c} na polje` : `<b>Kompjuter</b> odlaže ${c} na polje`,
+    logDeal:n => `Nove karte – u špilu ih je još ${n}.`,
+    logLeft:(n, p) => `${n === 1 ? 'Posljednja karta s polja ide' : `Preostale karte s polja (${n}) idu`} ${p === 0 ? 'tebi' : 'kompjuteru'}.`,
+    logEnd:(r, a, b, s0, s1) => `Runda ${r}: Ti +${a}, Kompjuter +${b} → ${s0} : ${s1}`,
+    won:'Pobjeda!', lost:'Poraz.',
+    wonSub:(a, b) => `Rezultat ${a} : ${b} za tebe.`, lostSub:(a, b) => `Rezultat ${a} : ${b} za kompjuter.`,
+    overtime:(a, b) => `Neriješeno ${a} : ${b} – igra se dalje.`, playingTo:n => `Igra se do ${n} bodova.`,
+    sumThisRound:'Ova runda', sumTotal:'Ukupno', nextRound:'Sljedeća runda', again:'Još jedna partija',
+    newSub:'Ti protiv kompjutera. Trenutna partija se prekida.', playTo:'Igra se do', opponentLbl:'Protivnik',
+    levelHint:'Teško pamti odigrane karte i računa s tvojim najboljim odgovorom.', cancel:'Odustani', start:'Počni igru',
+    rulesSub:'Klasična scopa s 40 karata, za dva igrača.', gotIt:'U redu',
+    rulesHtml:
+      sec('Karte', 'Četiri boje: Dinari (novčići), Kupe (pehari), Špade (mačevi) i Bate (štapovi). Vrijednosti od 1 do 7, uz to Fanat (Fante) = 8, Konj (Cavallo) = 9 i Kralj (Re) = 10.')
+      + sec('Tok igre', 'Na početku su 4 karte otvorene na polju, a svaki igrač dobije 3. Igra se naizmjenično, po jedna karta. Kad su obje ruke prazne, oba igrača dobiju još po 3 karte, sve dok se špil ne potroši. Prvi igra onaj koji ne dijeli; djelitelj se mijenja svake runde.')
+      + sec('Uzimanje', 'Ako na polju leži karta iste vrijednosti, uzimaš nju – to ima prednost. Inače uzimaš više karata čija je ukupna vrijednost jednaka vrijednosti tvoje karte. Ako tvoja karta može uzeti, moraš uzeti; ako ne može, ostaje otvorena na polju.')
+      + sec('Scopa', 'Ako pokupiš sve karte s polja, to je scopa i odmah dobiješ 1 bod. Posljednji potez runde se ne računa kao scopa.')
+      + sec('Kraj runde', 'Karte koje ostanu na polju idu igraču koji je posljednji uzimao. Zatim po 1 bod za: najviše karata · najviše dinara · Settebello (sedmicu dinara) · primieru · plus svaka scopa. Kod neriješenog rezultata bod se ne dodjeljuje.')
+      + sec('Primiera', 'Za svaku boju broji se tvoja najjača karta, a računa se ukupna vrijednost te četiri karte. Igrač kojem nedostaje neka boja ne može dobiti primieru.')
+      + primTab('As', 'Slike')
+      + sec('Kraj partije', 'Pobjeđuje igrač koji prvi stigne do zadanog broja bodova. Ako oba stignu do njega u istoj rundi, pobjeđuje onaj s više bodova; kod neriješenog igra se dalje.')
+      + sec('Upravljanje', 'Izaberi kartu iz ruke, zatim karte na polju koje želiš uzeti – ili jednu od opcija ispod. Kartu možeš i povući na polje ili direktno na kartu koju uzimaš. Ako ne može ništa uzeti, odloži je tako da nakon izbora dodirneš polje. Ako postoji samo jedna mogućnost, ponovni dodir karte odmah je igra. <kbd>1</kbd>–<kbd>3</kbd> izbor karte, <kbd>Enter</kbd> igraj, <kbd>Esc</kbd> poništi, <kbd>T</kbd> savjet.'),
+    installTitle:'Scopa kao aplikacija', installBtn:'Instaliraj',
+    installText:'Otvara se kao aplikacija i radi i bez interneta.',
+    installIOS:`Dodirni <b>Dijeli</b> ${SHARE} → <b>„Dodaj na početni zaslon“</b>. Radi i bez interneta.`,
+    installMac:'U Safariju: <b>Datoteka → Dodaj u Dock</b>. Radi i bez interneta.',
+    installLink:'Instaliraj kao aplikaciju',
   },
 };
 let lang = 'de';
@@ -732,8 +793,9 @@ function t(k, ...a){
   if (v === undefined) v = I18N.de[k];
   return typeof v === 'function' ? v(...a) : v;
 }
-const rankName = r => r === 1 ? t('ace') : (FACE[r] || String(r));
-const cardName = c => isSB(c) ? t('settebelloName') : t('cardName', rankName(c.rank), SUITS[c.suit].name);
+const rankName = r => r === 1 ? t('ace') : ((t('faces') || FACE)[r] || String(r));
+const suitName = s => (t('suits') || [])[s] || SUITS[s].name;
+const cardName = c => isSB(c) ? t('settebelloName') : t('cardName', rankName(c.rank), suitName(c.suit));
 
 function shuffle(a){
   for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -899,11 +961,11 @@ function dealHands(){
   S.hands[0].sort((a, b) => a.rank - b.rank || a.suit - b.suit);
 }
 
-async function playMove(p, card, capture){
+async function playMove(p, card, capture, srcRect){
   if (!S || S.phase !== 'play' || S.turn !== p) return;
   const gid = S.id;
   const srcEl = p === 0 ? document.querySelector(`[data-hand="${card.id}"]`) : [...document.querySelectorAll('#oppHand .card')].pop();
-  const src = srcEl ? rectOf(srcEl) : null;
+  const src = srcRect || (srcEl ? rectOf(srcEl) : null);
   S.phase = 'anim';
   S.pending = {p, card, capture};
   S.sel = null; S.tsel = []; S.tip = null;
@@ -1446,7 +1508,7 @@ function applyStatic(){
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { const v = t(el.dataset.i18nAria); el.setAttribute('aria-label', v); el.title = v; });
-  $('#tipBtn').title = ({de:'Bester Zug laut Computer (Taste T)', it:'Mossa migliore secondo il computer (tasto T)', en:'Best move according to the computer (key T)'})[lang];
+  $('#tipBtn').title = ({de:'Bester Zug laut Computer (Taste T)', it:'Mossa migliore secondo il computer (tasto T)', en:'Best move according to the computer (key T)', sh:'Najbolji potez po kompjuteru (T)'})[lang];
   $('#langSel').value = lang;
   updateInstall();
 }
@@ -1529,6 +1591,113 @@ function giveTip(){
   render();
 }
 
+// Ausgewählte Karte aufs Spielfeld tippen: ablegen (nur wenn sie nichts stechen kann)
+function onFieldTap(){
+  if (!canAct()) return;
+  const info = selectedInfo();
+  if (!info){ if (S.table.length) $('#status').innerHTML = t('stSelectFirst'); return; }
+  if (!info.opts.length){ playMove(0, info.card, []); return; }
+  $('#status').innerHTML = t('mustCapture', mini(info.card));
+  shake(`[data-hand="${info.card.id}"]`);
+}
+
+// Ziehen: Handkarte aufs Spielfeld (ablegen / einzige Stichmöglichkeit) oder direkt auf eine Tischkarte
+let drag = null, suppressClick = false;
+function dropTarget(x, y){
+  const el = document.elementFromPoint(x, y);
+  if (!el) return null;
+  const tc = el.closest('#tableCards [data-table]');
+  if (tc) return {card:+tc.dataset.table};
+  if (el.closest('#tableCards') || el.closest('.center')) return {field:true};
+  return null;
+}
+function dropPlan(target){
+  const info = selectedInfo();
+  if (!info || !target) return null;
+  const {card, opts} = info;
+  if (target.card != null && opts.length){
+    const comp = opts.filter(o => o.some(c => c.id === target.card));
+    if (comp.length === 1) return {play:comp[0], card};
+    if (comp.length > 1) return {choose:[target.card], card};
+  }
+  if (!opts.length) return {play:[], card};
+  if (opts.length === 1) return {play:opts[0], card};
+  return {choose:[], card};
+}
+function clearDropMarks(){
+  document.querySelectorAll('.tablecards .hov').forEach(el => el.classList.remove('hov'));
+  const tc = $('#tableCards'); if (tc) tc.classList.remove('drop-ok');
+}
+function markDrop(target){
+  clearDropMarks();
+  const plan = dropPlan(target);
+  if (!plan) return;
+  $('#tableCards').classList.add('drop-ok');
+  const ids = plan.play ? plan.play.map(c => c.id) : plan.choose;
+  ids.forEach(id => { const el = document.querySelector(`[data-table="${id}"]`); if (el) el.classList.add('hov'); });
+}
+function startDrag(){
+  const card = S.hands[0].find(c => c.id === drag.id);
+  if (!card) { drag = null; return; }
+  drag.active = true;
+  S.sel = drag.id; S.tsel = []; S.tip = null;
+  render();
+  const el = document.querySelector(`[data-hand="${drag.id}"]`);
+  if (el) el.style.visibility = 'hidden';
+  drag.home = el ? rectOf(el) : drag.r0;
+  drag.fly = makeFly(faceSVG(card), drag.r0, 5);
+  drag.fly.classList.add('dragging');
+}
+function moveDrag(x, y){
+  const r = {x:x - drag.ox, y:y - drag.oy, w:drag.r0.w, h:drag.r0.h};
+  place(drag.fly, r);
+  markDrop(dropTarget(x, y));
+}
+async function endDrag(x, y){
+  const d = drag; drag = null;
+  suppressClick = true; setTimeout(() => { suppressClick = false; }, 350);
+  const plan = dropPlan(dropTarget(x, y));
+  clearDropMarks();
+  if (plan && plan.play){
+    const r = d.fly._r;
+    d.fly.remove();
+    playMove(0, plan.card, plan.play, r);
+    return;
+  }
+  // zurück in die Hand
+  if (canAnimate()) await flyTo(d.fly, d.home, 220);
+  d.fly.remove();
+  if (!S) return;
+  if (plan && plan.choose){ S.sel = plan.card.id; S.tsel = plan.choose; }
+  render();
+}
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest('#myHand [data-hand]');
+  if (!el || !canAct() || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  if (e.pointerType === 'mouse') e.preventDefault();
+  const r0 = rectOf(el);
+  drag = {id:+el.dataset.hand, pid:e.pointerId, sx:e.clientX, sy:e.clientY, ox:e.clientX - r0.x, oy:e.clientY - r0.y, r0, active:false};
+});
+document.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  if (!drag.active){
+    if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 8) return;
+    if (!canAct()){ drag = null; return; }
+    startDrag();
+    if (!drag) return;
+  }
+  e.preventDefault();
+  moveDrag(e.clientX, e.clientY);
+}, {passive:false});
+document.addEventListener('pointerup', e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  if (drag.active) endDrag(e.clientX, e.clientY); else drag = null;
+});
+document.addEventListener('pointercancel', e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  if (drag.active){ const d = drag; drag = null; d.fly.remove(); clearDropMarks(); render(); } else drag = null;
+});
+
 function highlightOpt(i){
   document.querySelectorAll('.tablecards .hov').forEach(el => el.classList.remove('hov'));
   if (i == null || !canAct()) return;
@@ -1576,7 +1745,9 @@ function onAct(a, el){
 
 document.addEventListener('click', e => {
   const tEl = e.target.closest('[data-hand],[data-table],[data-opt],[data-discard],[data-act]');
+  if (suppressClick){ suppressClick = false; return; }
   if (!tEl){
+    if (e.target.closest('#tableCards')){ onFieldTap(); return; }
     // Tippen auf freien Filz hebt die Auswahl auf
     if (S && S.sel != null && canAct() && e.target.closest('.table') && !e.target.closest('.bar')){
       S.sel = null; S.tsel = []; S.tip = null; render();
@@ -1672,7 +1843,7 @@ if ('serviceWorker' in navigator && isHttp){
 /* ================= Start ================= */
 load();
 const nav = (navigator.language || 'de').slice(0, 2).toLowerCase();
-lang = ui.lang || (I18N[nav] ? nav : 'en');
+lang = ui.lang || (I18N[nav] ? nav : (['hr','sr','bs','sh','cnr'].includes(nav) ? 'sh' : 'en'));
 applyStatic();
 newGame();
 })();
