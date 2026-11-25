@@ -1420,7 +1420,7 @@ function logText(e){
   return '';
 }
 
-function render(){
+function render(o = {}){
   if (!S) return;
   const P = S.pending;
   let fi = 0;
@@ -1452,12 +1452,21 @@ function render(){
     .map(c => `<div class="card back"${fx(c.id)}>${BACK}</div>`).join('');
   const mh = $('#myHand');
   mh.classList.toggle('locked', !canAct());
-  mh.innerHTML = S.hands[0].filter(c => !P || P.card.id !== c.id).map((c, i) => {
-    let cls = 'card';
-    if (S.sel === c.id && canAct()) cls += ' sel';
-    if (S.tip && S.tip.card === c.id) cls += ' tip';
-    return `<div class="${cls}"${fx(c.id)} data-hand="${c.id}" title="${cardName(c)} · ${t('key', i + 1)}">${faceSVG(c)}</div>`;
-  }).join('');
+  // Während des Ziehens die Hand nicht neu aufbauen: iOS schickt die Fingerbewegungen sonst an die entfernte Karte
+  if (o.keepHand || (drag && drag.active)){
+    mh.querySelectorAll('[data-hand]').forEach(el => {
+      const id = +el.dataset.hand;
+      el.classList.toggle('sel', S.sel === id && canAct());
+      el.classList.toggle('tip', !!(S.tip && S.tip.card === id));
+    });
+  } else {
+    mh.innerHTML = S.hands[0].filter(c => !P || P.card.id !== c.id).map((c, i) => {
+      let cls = 'card';
+      if (S.sel === c.id && canAct()) cls += ' sel';
+      if (S.tip && S.tip.card === c.id) cls += ' tip';
+      return `<div class="${cls}"${fx(c.id)} data-hand="${c.id}" title="${cardName(c)} · ${t('key', i + 1)}">${faceSVG(c)}</div>`;
+    }).join('');
+  }
   fresh.clear();
 
   // Sitze, Stapel
@@ -1688,8 +1697,8 @@ function startDrag(){
   if (!card) { drag = null; return; }
   drag.active = true;
   S.sel = drag.id; S.tsel = []; S.tip = null;
-  render();
-  const el = document.querySelector(`[data-hand="${drag.id}"]`);
+  render({keepHand:true});
+  const el = drag.el && drag.el.isConnected ? drag.el : document.querySelector(`[data-hand="${drag.id}"]`);
   if (el) el.style.visibility = 'hidden';
   drag.home = el ? rectOf(el) : drag.r0;
   drag.fly = makeFly(faceSVG(card), drag.r0, 5);
@@ -1722,13 +1731,14 @@ document.addEventListener('pointerdown', e => {
   const el = e.target.closest('#myHand [data-hand]');
   if (!el || !canAct() || (e.pointerType === 'mouse' && e.button !== 0)) return;
   if (e.pointerType === 'mouse') e.preventDefault();
+  if (drag && drag.active){ if (drag.fly) drag.fly.remove(); clearDropMarks(); }   // hängengebliebenen Zug aufräumen
   const r0 = rectOf(el);
-  drag = {id:+el.dataset.hand, pid:e.pointerId, sx:e.clientX, sy:e.clientY, ox:e.clientX - r0.x, oy:e.clientY - r0.y, r0, active:false};
+  drag = {id:+el.dataset.hand, el, pid:e.pointerId, type:e.pointerType, sx:e.clientX, sy:e.clientY, ox:e.clientX - r0.x, oy:e.clientY - r0.y, r0, active:false};
 });
 document.addEventListener('pointermove', e => {
   if (!drag || e.pointerId !== drag.pid) return;
   if (!drag.active){
-    if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 8) return;
+    if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < (drag.type === 'mouse' ? 6 : 14)) return;   // ein leicht verwackeltes Antippen ist noch kein Ziehen
     if (!canAct()){ drag = null; return; }
     startDrag();
     if (!drag) return;
