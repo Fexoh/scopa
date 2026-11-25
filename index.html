@@ -651,7 +651,7 @@ const I18N = {
     lvl_easy:'Leicht', lvl_normal:'Normal', lvl_hard:'Schwer',
     rowCards:'Karten', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Siebener', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Bilanz: ${w} ${w === 1 ? 'Sieg' : 'Siege'} · ${l} ${l === 1 ? 'Niederlage' : 'Niederlagen'}`,
-    settings:'Einstellungen', language:'Sprache', hintsLabel:'Hinweise', hintsDesc:'Kurze Einblendungen, z. B. wenn eine Karte stechen muss.', done:'Fertig', tipTitle:'Tipp: bester Zug laut Computer (T)',
+    settings:'Einstellungen', language:'Sprache', hintsLabel:'Hinweise', hintsDesc:'Einblendungen wie „muss stechen“ und Markierung der Karten, die du nehmen kannst.', done:'Fertig', tipTitle:'Tipp: bester Zug laut Computer (T)',
     toastMany:c => `${c} sticht – tippe die Karten an, die du nehmen willst.`,
     ace:'Ass', cardName:(r, s) => `${r} ${s}`, settebelloName:'Settebello (7 Denari)', key:n => `Taste ${n}`,
     logStart:(r, compDeals) => `Runde ${r}: ${compDeals ? 'Der Computer gibt – du beginnst.' : 'Du gibst – der Computer beginnt.'}`,
@@ -704,7 +704,7 @@ const I18N = {
     lvl_easy:'Facile', lvl_normal:'Normale', lvl_hard:'Difficile',
     rowCards:'Carte', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Sette', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Bilancio: ${w} ${w === 1 ? 'vittoria' : 'vittorie'} · ${l} ${l === 1 ? 'sconfitta' : 'sconfitte'}`,
-    settings:'Impostazioni', language:'Lingua', hintsLabel:'Avvisi', hintsDesc:'Brevi messaggi, ad es. quando una carta deve prendere.', done:'Fatto', tipTitle:'Consiglio: mossa migliore secondo il computer (T)',
+    settings:'Impostazioni', language:'Lingua', hintsLabel:'Avvisi', hintsDesc:'Messaggi come «deve prendere» ed evidenziazione delle carte che puoi prendere.', done:'Fatto', tipTitle:'Consiglio: mossa migliore secondo il computer (T)',
     toastMany:c => `${c} prende – tocca le carte che vuoi prendere.`,
     ace:'Asso', cardName:(r, s) => `${r} di ${s}`, settebelloName:'Settebello (7 di Denari)', key:n => `tasto ${n}`,
     logStart:(r, compDeals) => `Mano ${r}: ${compDeals ? 'Il computer fa le carte – inizi tu.' : 'Fai tu le carte – inizia il computer.'}`,
@@ -757,7 +757,7 @@ const I18N = {
     lvl_easy:'Easy', lvl_normal:'Normal', lvl_hard:'Hard',
     rowCards:'Cards', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Sevens', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Record: ${w} ${w === 1 ? 'win' : 'wins'} · ${l} ${l === 1 ? 'loss' : 'losses'}`,
-    settings:'Settings', language:'Language', hintsLabel:'Hints', hintsDesc:'Short pop-up messages, e.g. when a card must capture.', done:'Done', tipTitle:'Hint: best move according to the computer (T)',
+    settings:'Settings', language:'Language', hintsLabel:'Hints', hintsDesc:'Messages like “must capture” and highlighting of the cards you can take.', done:'Done', tipTitle:'Hint: best move according to the computer (T)',
     toastMany:c => `${c} captures – tap the cards you want to take.`,
     ace:'Ace', cardName:(r, s) => `${r} of ${s}`, settebelloName:'Settebello (7 of Denari)', key:n => `key ${n}`,
     logStart:(r, compDeals) => `Round ${r}: ${compDeals ? 'The computer deals – you start.' : 'You deal – the computer starts.'}`,
@@ -811,7 +811,7 @@ const I18N = {
     lvl_easy:'Lako', lvl_normal:'Normalno', lvl_hard:'Teško',
     rowCards:'Karte', rowDenari:'Dinari', rowSettebello:'Settebello', rowSevens:'Sedmice', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Pobjede: ${w} · Porazi: ${l}`,
-    settings:'Postavke', language:'Jezik', hintsLabel:'Napomene', hintsDesc:'Kratke poruke, npr. kad karta mora uzeti.', done:'Gotovo', tipTitle:'Savjet: najbolji potez po kompjuteru (T)',
+    settings:'Postavke', language:'Jezik', hintsLabel:'Napomene', hintsDesc:'Poruke poput „mora uzeti“ i označavanje karata koje možeš uzeti.', done:'Gotovo', tipTitle:'Savjet: najbolji potez po kompjuteru (T)',
     toastMany:c => `${c} uzima – dodirni karte koje želiš uzeti.`,
     ace:'As', cardName:(r, s) => `${r} ${s}`, settebelloName:'Settebello (sedmica dinara)', key:n => `[${n}]`,
     logStart:(r, compDeals) => `Runda ${r}: ${compDeals ? 'Kompjuter dijeli – ti počinješ.' : 'Ti dijeliš – kompjuter počinje.'}`,
@@ -1437,7 +1437,7 @@ function render(){
   let th = S.table.map(c => {
     let cls = 'card';
     if (opts && opts.length){
-      cls += pick.has(c.id) ? ' pickable' : ' dim';
+      if (ui.hints) cls += pick.has(c.id) ? ' pickable' : ' dim';   // Markierungen gehören zu den Hinweisen
       if (S.tsel.includes(c.id)) cls += ' picked';
     }
     if (tipc.has(c.id)) cls += ' tipcap';
@@ -1680,7 +1680,7 @@ function markDrop(target){
   const plan = dropPlan(target);
   if (!plan) return;
   $('#tableCards').classList.add('drop-ok');
-  const ids = plan.play ? plan.play.map(c => c.id) : plan.choose;
+  const ids = ui.hints ? (plan.play ? plan.play.map(c => c.id) : plan.choose) : [];
   ids.forEach(id => { const el = document.querySelector(`[data-table="${id}"]`); if (el) el.classList.add('hov'); });
 }
 function startDrag(){
@@ -1784,7 +1784,7 @@ function onAct(a, el){
   }
 }
 
-$('#hintsToggle').addEventListener('change', e => { ui.hints = e.target.checked; save(); if (!ui.hints) hideToast(); });
+$('#hintsToggle').addEventListener('change', e => { ui.hints = e.target.checked; save(); if (!ui.hints) hideToast(); render(); });
 const CLICKABLE = '[data-hand],[data-table],[data-opt],[data-discard],[data-act],[data-lang]';
 document.addEventListener('click', e => {
   let tEl = e.target.closest(CLICKABLE);
