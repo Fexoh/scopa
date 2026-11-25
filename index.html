@@ -294,6 +294,8 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
 @media (max-width:760px), (max-height:520px) and (orientation:landscape){
   .only-compact{display:inline-flex !important}
   header.top{padding:calc(8px + var(--sat)) 12px 4px;gap:8px}
+  body{background:var(--linen)}
+  header.top{position:sticky;top:0;z-index:25;background:var(--linen)}
   .brand h1{font-size:28px}
   .brand small{display:none}
   .top .actions{gap:6px}
@@ -377,6 +379,11 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
   .tablecards .card{width:calc(var(--cw)*.8);height:calc(var(--ch)*.8);border-radius:6px}
   .deck .stack{width:calc(var(--cw)*.6);height:calc(var(--ch)*.6)}
   .bar{min-height:40px;padding:4px 6px 4px 12px;font-size:13px}
+}
+
+/* Installierte App (iPhone, hochkant): Abstand zur Statusleiste, damit der iOS-Glaseffekt nichts verdeckt */
+@media (display-mode: standalone) and (orientation: portrait){
+  header.top{padding-top:calc(16px + var(--sat))}
 }
 </style>
 </head>
@@ -591,7 +598,7 @@ const I18N = {
     tipPrefix:'<b>Tipp:</b> ',
     stCant:c => `${c} kann nichts stechen – aufs Spielfeld tippen oder ziehen:`, putDown:'Auf den Tisch legen',
     mustCapture:c => `<b>${c} muss stechen</b> – sie kann nicht abgelegt werden.`,
-    stOne:c => `${c} sticht – Karte nochmal wählen oder:`,
+    stOne:c => `${c} sticht – Tischkarte antippen, hinziehen oder:`,
     stMany:c => `${c} sticht – wähle, was du nimmst:`,
     stSelectFirst:'<b>Wähle zuerst eine Handkarte</b>, dann die Tischkarten.',
     thisRound:'Diese Runde', history:'Verlauf', round:n => `Runde ${n}`, upTo:n => `bis ${n}`, opponent:l => `Gegner: ${l}`,
@@ -622,7 +629,7 @@ const I18N = {
       + sec('Primiera', 'Pro Farbe zählt deine beste Karte, die vier Werte werden addiert. Wer nicht alle vier Farben hat, kann die Primiera nicht gewinnen.')
       + primTab('Ass', 'Bildkarten')
       + sec('Spielende', 'Wer zuerst die Zielpunktzahl erreicht, gewinnt. Erreichen beide sie in derselben Runde, gewinnt die höhere Zahl; bei Gleichstand wird weitergespielt.')
-      + sec('Bedienung', 'Wähle eine Handkarte und dann die Tischkarten, die du nehmen willst – oder eine der Optionen unten. Du kannst die Karte auch aufs Spielfeld oder direkt auf eine Tischkarte ziehen. Kann sie nichts stechen, legst du sie ab, indem du nach der Auswahl aufs Spielfeld tippst. Gibt es nur eine Möglichkeit, spielt ein zweites Antippen der Karte sie direkt. Tasten: <kbd>1</kbd>–<kbd>3</kbd> Karte wählen, <kbd>Enter</kbd> spielen, <kbd>Esc</kbd> abwählen, <kbd>T</kbd> Tipp.'),
+      + sec('Bedienung', 'Wähle eine Handkarte und dann die Tischkarten, die du nehmen willst – oder eine der Optionen unten. Du kannst die Karte auch aufs Spielfeld oder direkt auf eine Tischkarte ziehen. Kann sie nichts stechen, legst du sie ab, indem du nach der Auswahl aufs Spielfeld tippst. Nochmal antippen hebt die Auswahl auf; mit der Maus spielt ein Doppelklick die Karte direkt, wenn es nur eine Möglichkeit gibt. Tasten: <kbd>1</kbd>–<kbd>3</kbd> Karte wählen, <kbd>Enter</kbd> spielen, <kbd>Esc</kbd> abwählen, <kbd>T</kbd> Tipp.'),
     installTitle:'Scopa als App', installBtn:'Installieren',
     installText:'Startet wie eine App und läuft auch offline.',
     installIOS:`Tippe auf <b>Teilen</b> ${SHARE} → <b>„Zum Home-Bildschirm“</b>. Läuft dann auch offline.`,
@@ -643,7 +650,7 @@ const I18N = {
     tipPrefix:'<b>Consiglio:</b> ',
     stCant:c => `${c} non può prendere – tocca il tavolo o trascinala lì:`, putDown:'Metti sul tavolo',
     mustCapture:c => `<b>${c} deve prendere</b> – non si può scartare.`,
-    stOne:c => `${c} prende – seleziona di nuovo la carta oppure:`,
+    stOne:c => `${c} prende – tocca la carta sul tavolo, trascinala o:`,
     stMany:c => `${c} prende – scegli cosa prendere:`,
     stSelectFirst:'<b>Scegli prima una carta dalla mano</b>, poi le carte sul tavolo.',
     thisRound:'Questa mano', history:'Cronologia', round:n => `Mano ${n}`, upTo:n => `a ${n}`, opponent:l => `Avversario: ${l}`,
@@ -674,7 +681,7 @@ const I18N = {
       + sec('Primiera', 'Per ogni seme conta la tua carta migliore; si sommano i quattro valori. Chi non ha tutti e quattro i semi non può vincere la primiera.')
       + primTab('Asso', 'Figure')
       + sec('Fine della partita', 'Vince chi raggiunge per primo il punteggio stabilito. Se lo raggiungono entrambi nella stessa mano vince chi ha di più; in caso di parità si continua.')
-      + sec('Comandi', 'Scegli una carta dalla mano e poi le carte del tavolo che vuoi prendere – oppure una delle opzioni in basso. Puoi anche trascinare la carta sul tavolo o direttamente sulla carta da prendere. Se non può prendere nulla, scartala toccando il tavolo dopo averla scelta. Se c’è una sola possibilità, toccare di nuovo la carta la gioca subito. Tasti: <kbd>1</kbd>–<kbd>3</kbd> scegli la carta, <kbd>Invio</kbd> gioca, <kbd>Esc</kbd> annulla, <kbd>T</kbd> consiglio.'),
+      + sec('Comandi', 'Scegli una carta dalla mano e poi le carte del tavolo che vuoi prendere – oppure una delle opzioni in basso. Puoi anche trascinare la carta sul tavolo o direttamente sulla carta da prendere. Se non può prendere nulla, scartala toccando il tavolo dopo averla scelta. Toccarla di nuovo annulla la selezione; con il mouse un doppio clic la gioca subito se c’è una sola possibilità. Tasti: <kbd>1</kbd>–<kbd>3</kbd> scegli la carta, <kbd>Invio</kbd> gioca, <kbd>Esc</kbd> annulla, <kbd>T</kbd> consiglio.'),
     installTitle:'Scopa come app', installBtn:'Installa',
     installText:"Si apre come un'app e funziona anche offline.",
     installIOS:`Tocca <b>Condividi</b> ${SHARE} → <b>«Aggiungi alla schermata Home»</b>. Funziona anche offline.`,
@@ -695,7 +702,7 @@ const I18N = {
     tipPrefix:'<b>Hint:</b> ',
     stCant:c => `${c} can’t capture – tap the table or drag it there:`, putDown:'Put it on the table',
     mustCapture:c => `<b>${c} must capture</b> – it can’t be put down.`,
-    stOne:c => `${c} captures – select it again or:`,
+    stOne:c => `${c} captures – tap the table card, drag it there, or:`,
     stMany:c => `${c} captures – choose what to take:`,
     stSelectFirst:'<b>Select a hand card first</b>, then the table cards.',
     thisRound:'This round', history:'History', round:n => `Round ${n}`, upTo:n => `to ${n}`, opponent:l => `Opponent: ${l}`,
@@ -726,7 +733,7 @@ const I18N = {
       + sec('Primiera', 'For each suit your best card counts; the four values are added up. A player missing a suit can’t win the Primiera.')
       + primTab('Ace', 'Face cards')
       + sec('End of the game', 'The first to reach the target score wins. If both reach it in the same round, the higher score wins; on a tie, play continues.')
-      + sec('Controls', 'Select a hand card, then the table cards you want to take – or one of the options below. You can also drag the card onto the table or straight onto a card to capture. If it can’t capture, put it down by tapping the table after selecting it. If there’s only one possibility, tapping the card again plays it. Keys: <kbd>1</kbd>–<kbd>3</kbd> select a card, <kbd>Enter</kbd> play, <kbd>Esc</kbd> deselect, <kbd>T</kbd> hint.'),
+      + sec('Controls', 'Select a hand card, then the table cards you want to take – or one of the options below. You can also drag the card onto the table or straight onto a card to capture. If it can’t capture, put it down by tapping the table after selecting it. Tapping it again deselects it; with a mouse, a double-click plays it straight away if there’s only one possibility. Keys: <kbd>1</kbd>–<kbd>3</kbd> select a card, <kbd>Enter</kbd> play, <kbd>Esc</kbd> deselect, <kbd>T</kbd> hint.'),
     installTitle:'Scopa as an app', installBtn:'Install',
     installText:'Opens like an app and works offline.',
     installIOS:`Tap <b>Share</b> ${SHARE} → <b>“Add to Home Screen”</b>. Works offline too.`,
@@ -748,7 +755,7 @@ const I18N = {
     tipPrefix:'<b>Savjet:</b> ',
     stCant:c => `${c} ne može ništa uzeti – dodirni polje ili je povuci na njega:`, putDown:'Odloži na polje',
     mustCapture:c => `<b>${c} mora uzeti</b> – ne može se odložiti.`,
-    stOne:c => `${c} uzima – dodirni kartu još jednom ili:`,
+    stOne:c => `${c} uzima – dodirni kartu na polju, povuci je ili:`,
     stMany:c => `${c} uzima – izaberi karte koje uzimaš:`,
     stSelectFirst:'<b>Prvo izaberi kartu iz ruke</b>, zatim karte na polju.',
     thisRound:'Ova runda', history:'Tok igre', round:n => `Runda ${n}`, upTo:n => `do ${n}`, opponent:l => `Protivnik: ${l}`,
@@ -779,7 +786,7 @@ const I18N = {
       + sec('Primiera', 'Za svaku boju broji se tvoja najjača karta, a računa se ukupna vrijednost te četiri karte. Igrač kojem nedostaje neka boja ne može dobiti primieru.')
       + primTab('As', 'Slike')
       + sec('Kraj partije', 'Pobjeđuje igrač koji prvi stigne do zadanog broja bodova. Ako oba stignu do njega u istoj rundi, pobjeđuje onaj s više bodova; kod neriješenog igra se dalje.')
-      + sec('Upravljanje', 'Izaberi kartu iz ruke, zatim karte na polju koje želiš uzeti – ili jednu od opcija ispod. Kartu možeš i povući na polje ili direktno na kartu koju uzimaš. Ako ne može ništa uzeti, odloži je tako da nakon izbora dodirneš polje. Ako postoji samo jedna mogućnost, ponovni dodir karte odmah je igra. <kbd>1</kbd>–<kbd>3</kbd> izbor karte, <kbd>Enter</kbd> igraj, <kbd>Esc</kbd> poništi, <kbd>T</kbd> savjet.'),
+      + sec('Upravljanje', 'Izaberi kartu iz ruke, zatim karte na polju koje želiš uzeti – ili jednu od opcija ispod. Kartu možeš i povući na polje ili direktno na kartu koju uzimaš. Ako ne može ništa uzeti, odloži je tako da nakon izbora dodirneš polje. Ponovni dodir poništava izbor; mišem dvostruki klik odmah igra kartu ako postoji samo jedna mogućnost. <kbd>1</kbd>–<kbd>3</kbd> izbor karte, <kbd>Enter</kbd> igraj, <kbd>Esc</kbd> poništi, <kbd>T</kbd> savjet.'),
     installTitle:'Scopa kao aplikacija', installBtn:'Instaliraj',
     installText:'Otvara se kao aplikacija i radi i bez interneta.',
     installIOS:`Dodirni <b>Dijeli</b> ${SHARE} → <b>„Dodaj na početni zaslon“</b>. Radi i bez interneta.`,
@@ -1527,14 +1534,14 @@ function selectedInfo(){
   return card ? {card, opts:captureOptions(card.rank, S.table)} : null;
 }
 
-function onHandClick(id){
+// Mit der Maus spielt ein Doppelklick die Karte direkt, wenn es nur eine Möglichkeit gibt
+let lastPointer = 'mouse', lastHandClick = null;
+document.addEventListener('pointerdown', e => { lastPointer = e.pointerType; }, true);
+function onHandClick(id, detail){
   if (!canAct()) return;
-  if (S.sel === id){
-    const info = selectedInfo();
-    if (info && info.opts.length <= 1){ playMove(0, info.card, info.opts[0] || []); return; }
-    S.sel = null; S.tsel = []; S.tip = null; render();
-    return;
-  }
+  if (detail >= 2 && lastPointer === 'mouse' && lastHandClick === id){ lastHandClick = null; quickPlay(id); return; }
+  lastHandClick = id;
+  if (S.sel === id){ S.sel = null; S.tsel = []; S.tip = null; render(); return; }
   S.sel = id; S.tsel = []; S.tip = null;
   render();
 }
@@ -1743,8 +1750,14 @@ function onAct(a, el){
   }
 }
 
+const CLICKABLE = '[data-hand],[data-table],[data-opt],[data-discard],[data-act]';
 document.addEventListener('click', e => {
-  const tEl = e.target.closest('[data-hand],[data-table],[data-opt],[data-discard],[data-act]');
+  let tEl = e.target.closest(CLICKABLE);
+  // Nach einem Neuzeichnen kann der Browser den Klick dem Container zuordnen – dann frisch nachsehen, was unter dem Zeiger liegt
+  if (!tEl && e.detail > 0){
+    const hit = document.elementFromPoint(e.clientX, e.clientY);
+    tEl = hit && hit.closest(CLICKABLE);
+  }
   if (suppressClick){ suppressClick = false; return; }
   if (!tEl){
     if (e.target.closest('#tableCards')){ onFieldTap(); return; }
@@ -1755,7 +1768,7 @@ document.addEventListener('click', e => {
     return;
   }
   if (tEl.tagName === 'BUTTON') tEl.blur();
-  if (tEl.dataset.hand != null) onHandClick(+tEl.dataset.hand);
+  if (tEl.dataset.hand != null) onHandClick(+tEl.dataset.hand, e.detail);
   else if (tEl.dataset.table != null) onTableClick(+tEl.dataset.table);
   else if (tEl.dataset.opt != null) onOpt(+tEl.dataset.opt);
   else if (tEl.dataset.discard != null) onDiscard();

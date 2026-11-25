@@ -1,6 +1,6 @@
 // Scopa – Service Worker: macht das Spiel offline spielbar.
 // Seite: erst Netz (damit Updates ankommen), sonst Cache. Alles andere: erst Cache.
-const CACHE = 'scopa-v3';
+const CACHE = 'scopa-v4';
 const ASSETS = [
   './',
   './index.html',
