@@ -134,6 +134,15 @@ main.layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22
 .langopt.on small{color:rgba(251,245,230,.75)}
 @media (hover:hover){ .langopt:not(.on):hover{border-color:var(--brass)} }
 #setInstall .btn{margin-top:2px}
+.switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid #cbbd9c;border-radius:12px;background:#fff;cursor:pointer;font-family:var(--sans)}
+.switchrow .lbl{display:flex;flex-direction:column;gap:2px;min-width:0}
+.switchrow b{font-weight:600;font-size:14.5px}
+.switchrow small{font-size:12.5px;color:var(--muted);line-height:1.35}
+.switch{appearance:none;-webkit-appearance:none;margin:0;flex:0 0 auto;position:relative;width:50px;height:30px;border-radius:999px;background:#d8ccb2;cursor:pointer;transition:background .2s}
+.switch::before{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.switch:checked{background:var(--green)}
+.switch:checked::before{transform:translateX(20px)}
+.switch:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 .pts{display:none;font-family:var(--sans);font-style:normal;font-size:12px;font-weight:700;background:rgba(255,255,255,.13);color:var(--cream);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
 .badge{font-family:var(--sans);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid rgba(201,162,74,.6);color:var(--brass-hi);white-space:nowrap}
 .turn{font-family:var(--sans);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--brass-hi);white-space:nowrap}
@@ -538,6 +547,12 @@ h3.sec{margin:0 0 8px;font-size:11.5px;font-family:var(--sans);letter-spacing:.1
         <button class="langopt" data-lang="sh"><b>Srpskohrvatski</b><small>SH</small></button>
       </div>
     </div>
+    <div class="field">
+      <label class="switchrow" for="hintsToggle">
+        <span class="lbl"><b data-i18n="hintsLabel">Hinweise</b><small data-i18n="hintsDesc"></small></span>
+        <input type="checkbox" id="hintsToggle" class="switch" role="switch">
+      </label>
+    </div>
     <div class="field" id="setInstall" hidden><span data-i18n="installTitle">Scopa als App</span>
       <button class="btn" data-act="installShow" data-i18n="installLink">Als App installieren</button>
     </div>
@@ -636,7 +651,7 @@ const I18N = {
     lvl_easy:'Leicht', lvl_normal:'Normal', lvl_hard:'Schwer',
     rowCards:'Karten', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Siebener', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Bilanz: ${w} ${w === 1 ? 'Sieg' : 'Siege'} · ${l} ${l === 1 ? 'Niederlage' : 'Niederlagen'}`,
-    settings:'Einstellungen', language:'Sprache', done:'Fertig', tipTitle:'Tipp: bester Zug laut Computer (T)',
+    settings:'Einstellungen', language:'Sprache', hintsLabel:'Hinweise', hintsDesc:'Kurze Einblendungen, z. B. wenn eine Karte stechen muss.', done:'Fertig', tipTitle:'Tipp: bester Zug laut Computer (T)',
     toastMany:c => `${c} sticht – tippe die Karten an, die du nehmen willst.`,
     ace:'Ass', cardName:(r, s) => `${r} ${s}`, settebelloName:'Settebello (7 Denari)', key:n => `Taste ${n}`,
     logStart:(r, compDeals) => `Runde ${r}: ${compDeals ? 'Der Computer gibt – du beginnst.' : 'Du gibst – der Computer beginnt.'}`,
@@ -689,7 +704,7 @@ const I18N = {
     lvl_easy:'Facile', lvl_normal:'Normale', lvl_hard:'Difficile',
     rowCards:'Carte', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Sette', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Bilancio: ${w} ${w === 1 ? 'vittoria' : 'vittorie'} · ${l} ${l === 1 ? 'sconfitta' : 'sconfitte'}`,
-    settings:'Impostazioni', language:'Lingua', done:'Fatto', tipTitle:'Consiglio: mossa migliore secondo il computer (T)',
+    settings:'Impostazioni', language:'Lingua', hintsLabel:'Avvisi', hintsDesc:'Brevi messaggi, ad es. quando una carta deve prendere.', done:'Fatto', tipTitle:'Consiglio: mossa migliore secondo il computer (T)',
     toastMany:c => `${c} prende – tocca le carte che vuoi prendere.`,
     ace:'Asso', cardName:(r, s) => `${r} di ${s}`, settebelloName:'Settebello (7 di Denari)', key:n => `tasto ${n}`,
     logStart:(r, compDeals) => `Mano ${r}: ${compDeals ? 'Il computer fa le carte – inizi tu.' : 'Fai tu le carte – inizia il computer.'}`,
@@ -742,7 +757,7 @@ const I18N = {
     lvl_easy:'Easy', lvl_normal:'Normal', lvl_hard:'Hard',
     rowCards:'Cards', rowDenari:'Denari', rowSettebello:'Settebello', rowSevens:'Sevens', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Record: ${w} ${w === 1 ? 'win' : 'wins'} · ${l} ${l === 1 ? 'loss' : 'losses'}`,
-    settings:'Settings', language:'Language', done:'Done', tipTitle:'Hint: best move according to the computer (T)',
+    settings:'Settings', language:'Language', hintsLabel:'Hints', hintsDesc:'Short pop-up messages, e.g. when a card must capture.', done:'Done', tipTitle:'Hint: best move according to the computer (T)',
     toastMany:c => `${c} captures – tap the cards you want to take.`,
     ace:'Ace', cardName:(r, s) => `${r} of ${s}`, settebelloName:'Settebello (7 of Denari)', key:n => `key ${n}`,
     logStart:(r, compDeals) => `Round ${r}: ${compDeals ? 'The computer deals – you start.' : 'You deal – the computer starts.'}`,
@@ -796,7 +811,7 @@ const I18N = {
     lvl_easy:'Lako', lvl_normal:'Normalno', lvl_hard:'Teško',
     rowCards:'Karte', rowDenari:'Dinari', rowSettebello:'Settebello', rowSevens:'Sedmice', rowPrimiera:'Primiera', rowScope:'Scope',
     stats:(w, l) => `Pobjede: ${w} · Porazi: ${l}`,
-    settings:'Postavke', language:'Jezik', done:'Gotovo', tipTitle:'Savjet: najbolji potez po kompjuteru (T)',
+    settings:'Postavke', language:'Jezik', hintsLabel:'Napomene', hintsDesc:'Kratke poruke, npr. kad karta mora uzeti.', done:'Gotovo', tipTitle:'Savjet: najbolji potez po kompjuteru (T)',
     toastMany:c => `${c} uzima – dodirni karte koje želiš uzeti.`,
     ace:'As', cardName:(r, s) => `${r} ${s}`, settebelloName:'Settebello (sedmica dinara)', key:n => `[${n}]`,
     logStart:(r, compDeals) => `Runda ${r}: ${compDeals ? 'Kompjuter dijeli – ti počinješ.' : 'Ti dijeliš – kompjuter počinje.'}`,
@@ -949,7 +964,7 @@ let S = null, gameSeq = 0;
 const fresh = new Set();
 const settings = {target:11, level:'normal'};
 const stats = {won:0, lost:0};
-const ui = {lang:null, installDismissed:false};
+const ui = {lang:null, installDismissed:false, hints:true};
 const STORE = 'scopa.v1';
 
 function load(){
@@ -960,7 +975,7 @@ function load(){
       if (LEVELS[d.settings.level]) settings.level = d.settings.level;
     }
     if (d.stats){ stats.won = d.stats.won|0; stats.lost = d.stats.lost|0; }
-    if (d.ui){ if (I18N[d.ui.lang]) ui.lang = d.ui.lang; ui.installDismissed = !!d.ui.installDismissed; }
+    if (d.ui){ if (I18N[d.ui.lang]) ui.lang = d.ui.lang; ui.installDismissed = !!d.ui.installDismissed; if (d.ui.hints === false) ui.hints = false; }
   } catch(e){}
 }
 function save(){ try { localStorage.setItem(STORE, JSON.stringify({settings, stats, ui})); } catch(e){} }
@@ -1479,6 +1494,7 @@ function toast(html, ms = 2600){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), ms);
 }
+function hint(html){ if (ui.hints) toast(html); }
 function hideToast(){ clearTimeout(toastTimer); const el = $('#toast'); if (el) el.classList.remove('show'); }
 
 function renderPanel(){
@@ -1535,6 +1551,7 @@ function applyStatic(){
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { const v = t(el.dataset.i18nAria); el.setAttribute('aria-label', v); el.title = v; });
   document.querySelectorAll('.langopt').forEach(b => b.classList.toggle('on', b.dataset.lang === lang));
+  $('#hintsToggle').checked = ui.hints;
   $('#setInstall').hidden = !installMode();
   updateInstall();
 }
@@ -1564,7 +1581,7 @@ function onHandClick(id, detail){
   S.sel = id; S.tsel = []; S.tip = null;
   render();
   const info = selectedInfo();
-  if (info && info.opts.length > 1) toast(t('toastMany', mini(info.card)));
+  if (info && info.opts.length > 1) hint(t('toastMany', mini(info.card)));
   else hideToast();
 }
 
@@ -1587,8 +1604,8 @@ function shake(sel){
 function onTableClick(id){
   if (!canAct()) return;
   const info = selectedInfo();
-  if (!info){ toast(t('stSelectFirst')); return; }
-  if (!info.opts.length){ shake(`[data-table="${id}"]`); toast(t('stCant', mini(info.card))); return; }
+  if (!info){ hint(t('stSelectFirst')); return; }
+  if (!info.opts.length){ shake(`[data-table="${id}"]`); hint(t('stCant', mini(info.card))); return; }
   const next = S.tsel.includes(id) ? S.tsel.filter(x => x !== id) : S.tsel.concat(id);
   const compatible = info.opts.filter(o => next.every(x => o.some(c => c.id === x)));
   if (!compatible.length){ shake(`[data-table="${id}"]`); return; }
@@ -1625,9 +1642,9 @@ function giveTip(){
 function onFieldTap(){
   if (!canAct()) return;
   const info = selectedInfo();
-  if (!info){ if (S.table.length) toast(t('stSelectFirst')); return; }
+  if (!info){ if (S.table.length) hint(t('stSelectFirst')); return; }
   if (!info.opts.length){ playMove(0, info.card, []); return; }
-  toast(t('mustCapture', mini(info.card)));
+  hint(t('mustCapture', mini(info.card)));
   shake(`[data-hand="${info.card.id}"]`);
 }
 
@@ -1767,6 +1784,7 @@ function onAct(a, el){
   }
 }
 
+$('#hintsToggle').addEventListener('change', e => { ui.hints = e.target.checked; save(); if (!ui.hints) hideToast(); });
 const CLICKABLE = '[data-hand],[data-table],[data-opt],[data-discard],[data-act],[data-lang]';
 document.addEventListener('click', e => {
   let tEl = e.target.closest(CLICKABLE);
